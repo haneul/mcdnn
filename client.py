@@ -12,6 +12,10 @@ class DNNCmd(cmd.Cmd):
     def do_predict(self, line):
         cls = self.proxy.predict(self.clientID, line.strip())
         print(cls)
+
+    def do_change(self, line):
+        cmd = line.strip().split()
+        res = self.proxy.change(self.clientID, cmd[0], cmd[1], bool(cmd[2]))
    
     def do_EOF(self, line):
         return True 
@@ -32,7 +36,7 @@ def main():
         exit(0)
 
     proxy = xmlrpclib.ServerProxy("http://localhost:8000/")
-    clientID = proxy.register(args.model, args.pretrained)
+    clientID = proxy.register(args.model, args.pretrained, False)
     dnncmd = DNNCmd(proxy, clientID)
     dnncmd.cmdloop()
     proxy.unregister(clientID)
