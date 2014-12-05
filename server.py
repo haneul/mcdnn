@@ -1,6 +1,5 @@
 from SimpleXMLRPCServer import SimpleXMLRPCServer
 import xmlrpclib
-
 import caffe
 
 caffe_dir = "../caffe"
@@ -10,9 +9,35 @@ with open("synset_words.txt") as f:
 words = map(lambda x: x.strip(), words)
 
 clients = {}
+shared_net = None
 import numpy as np
 import uuid
-def register(model_file, pretrained, split=False):
+import pickle
+
+def load_digests(filename):
+    with open(filename) as f:
+        return pickle.load(f)
+
+def check_shared(digests):
+    shared = []
+    digests = load_digests(digests)
+    for layer_name in shared_net[0]._layer_names:
+        if(layer_name not in digests.keys()):
+            shared.append(layer_name)
+            continue
+        if(shared_net[1][layer_name] == digests[layer_name]):
+            shared.append(layer_name)
+        else:
+            break
+    return shared
+
+def register(model_file, pretrained, digests, split=False):
+    global shared_net
+    if(shared_net != None):
+        print(check_shared(digests))
+        return "tttt"
+    else:
+        print("new shared")
     net = caffe.Classifier(model_file, pretrained,
                            mean=np.load(caffe_dir + '/python/caffe/imagenet/ilsvrc_2012_mean.npy'),
                            channel_swap=(2,1,0),
@@ -23,6 +48,8 @@ def register(model_file, pretrained, split=False):
     net.set_mode_gpu()
     clientID = str(uuid.uuid1())
     clients[clientID] = (net, split)
+    if(shared_net == None):
+        shared_net = (net, load_digests(digests))
     return clientID
 
 def change(clientID, model_file, pretrained, split):
@@ -54,7 +81,10 @@ def predict(clientID, image_file):
         return words[i]
 
 def unregister(clientID):
+    global shared_net
     del clients[clientID]
+    if(len(clients) == 0):
+        shared_net = None
     return True
     
 #MODEL_FILE = caffe_dir + "/models/bvlc_reference_caffenet/deploy.prototxt"
