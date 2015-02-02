@@ -1,0 +1,132 @@
+layers {
+  bottom: "data"
+  top: "conv1"
+  name: "conv1"
+  type: CONVOLUTION
+  convolution_param {
+    num_output: 32
+    kernel_size: 11
+    stride: 1
+  }
+}
+layers {
+  bottom: "conv1"
+  top: "conv1"
+  name: "conv1.comput"
+  type: RELU
+}
+layers {
+  bottom: "conv1"
+  top: "pool2"
+  name: "pool2"
+  type: POOLING
+  pooling_param {
+    pool: MAX
+    kernel_size: 3
+    stride: 2
+    pad: 1
+  }
+}
+layers {
+  bottom: "pool2"
+  top: "conv3"
+  name: "conv3"
+  type: CONVOLUTION
+  convolution_param {
+    num_output: 16
+    kernel_size: 9
+    stride: 1
+  }
+}
+layers {
+  bottom: "conv3"
+  top: "conv3"
+  name: "conv3.comput"
+  type: RELU
+}
+layers {
+  bottom: "conv3"
+  top: "lconv4"
+  name: "lconv4"
+  type: LOCAL
+  local_param {
+    num_output: 16
+    kernel_size: 9
+    stride: 1
+  }
+}
+layers {
+  bottom: "lconv4"
+  top: "lconv4"
+  name: "lconv4.comput"
+  type: RELU
+}
+layers {
+  bottom: "lconv4"
+  top: "lconv5"
+  name: "lconv5"
+  type: LOCAL
+  local_param {
+    num_output: 16
+    kernel_size: 7
+    stride: 2
+  }
+}
+layers {
+  bottom: "lconv5"
+  top: "lconv5"
+  name: "lconv5.comput"
+  type: RELU
+}
+layers {
+  bottom: "lconv5"
+  top: "lconv6"
+  name: "lconv6"
+  type: LOCAL
+  local_param {
+    num_output: 16
+    kernel_size: 5
+    stride: 1
+  }
+}
+layers {
+  bottom: "lconv6"
+  top: "lconv6"
+  name: "lconv6.comput"
+  type: RELU
+}
+layers {
+  bottom: "lconv6"
+  top: "fc7"
+  name: "fc7"
+  type: INNER_PRODUCT
+  inner_product_param {
+    num_output: 4096
+  }
+}
+layers {
+  bottom: "fc7"
+  top: "fc7"
+  name: "fc7.comput"
+  type: RELU
+}
+layers {
+  bottom: "fc7"
+  top: "Result"
+  name: "Result"
+  type: INNER_PRODUCT
+  inner_product_param {
+    num_output: 200
+  }
+}
+layers {
+  bottom: "Result"
+  top: "prob"
+  name: "Result.comput"
+  type: SOFTMAX
+}
+input: "data"
+input_dim: 1
+input_dim: 3
+input_dim: 152
+input_dim: 152

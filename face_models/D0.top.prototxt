@@ -1,0 +1,33 @@
+layers {
+  name: "mnist"
+  type: MEMORY_DATA
+  top: "data"
+  top: "label"
+  memory_data_param {
+    batch_size: 5 
+    channels: 4096 
+    height: 1 
+    width: 1 
+  }
+}
+layers {
+  bottom: "data"
+  top: "Result"
+  name: "Result"
+  type: INNER_PRODUCT
+  inner_product_param {
+    num_output: 4
+  }
+}
+layers {
+  bottom: "Result"
+  bottom: "label"
+  name: "Result.comput"
+  type: SOFTMAX_LOSS
+  top: "loss"
+}
+#input: "data"
+#input_dim: 1
+#input_dim: 200 
+#input_dim: 1
+#input_dim: 1
