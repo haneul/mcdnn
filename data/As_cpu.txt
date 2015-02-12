@@ -1,0 +1,40 @@
+A0
+loading time (ms):  918.192148209
+memory (MB):  289.8046875
+compute time (ms):  361.571073532
+
+A1
+loading time (ms):  433.340072632
+memory (MB):  135.98046875
+compute time (ms):  277.704000473
+
+A2
+loading time (ms):  230.345010757
+memory (MB):  52.83984375
+compute time (ms):  250.857830048
+
+A3
+loading time (ms):  93.5301780701
+memory (MB):  9.40625
+compute time (ms):  227.216959
+
+A4
+loading time (ms):  425.163030624
+memory (MB):  133.12109375
+compute time (ms):  224.534034729
+
+A5
+loading time (ms):  422.112941742
+memory (MB):  131.94921875
+compute time (ms):  185.127019882
+
+A6
+loading time (ms):  495.311975479
+memory (MB):  157.7890625
+compute time (ms):  170.039892197
+
+A7
+loading time (ms):  304.093122482
+memory (MB):  69.98046875
+compute time (ms):  123.854875565
+

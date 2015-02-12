@@ -1,0 +1,41 @@
+#running on archon with GPU
+A0
+loading time (ms):  919.492006302
+memory (MB):  289.8046875
+compute time (ms):  9.22703742981
+
+A1
+loading time (ms):  437.483072281
+memory (MB):  135.98046875
+compute time (ms):  7.27915763855
+
+A2
+loading time (ms):  228.429079056
+memory (MB):  52.83984375
+compute time (ms):  6.95896148682
+
+A3
+loading time (ms):  74.3708610535
+memory (MB):  9.40625
+compute time (ms):  5.80382347107
+
+A4
+loading time (ms):  424.494028091
+memory (MB):  133.12109375
+compute time (ms):  6.4651966095
+
+A5
+loading time (ms):  423.091173172
+memory (MB):  131.94921875
+compute time (ms):  6.07991218567
+
+A6
+loading time (ms):  492.225170135
+memory (MB):  157.7890625
+compute time (ms):  6.30712509155
+
+A7
+loading time (ms):  236.050844193
+memory (MB):  69.98046875
+compute time (ms):  5.36179542542
+
