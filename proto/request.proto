@@ -1,0 +1,11 @@
+package uw.syhan.mcdnn;
+
+enum RequestType {
+    FACE = 1;
+};
+
+message DNNRequest {
+    required RequestType type = 1;
+    optional int32 layer = 2;
+    optional bytes data = 3;
+};
