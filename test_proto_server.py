@@ -40,6 +40,7 @@ class MyTCPHandler(SocketServer.StreamRequestHandler):
         beg = time.time()
         len_buf = self.rfile.read(4)
         length = struct.unpack('>L', len_buf)[0]
+        print("len" + str(length))
         payload = self.read_n(length)
         req = request_pb2.DNNRequest()
         req.ParseFromString(payload)
