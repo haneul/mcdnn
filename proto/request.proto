@@ -2,6 +2,7 @@ package uw.syhan.mcdnn;
 
 enum RequestType {
     FACE = 1;
+    OBJECT = 2;
 };
 
 message DNNRequest {
@@ -14,4 +15,5 @@ message DNNResponse {
     optional bool success = 1;
     optional double latency = 2;
     optional int32 result = 3;
+    optional string result_str = 4;
 };
