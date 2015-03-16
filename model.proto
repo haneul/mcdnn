@@ -1,0 +1,22 @@
+package uw.syhan.mcdnn;
+
+enum RequestType {
+    FACE = 1;
+    OBJECT = 2;
+};
+
+message ModelParameter
+{
+    optional string name = 1;
+    required RequestType type = 2;
+    optional string compute = 3;
+    optional string memory = 4;
+    optional float loading_latency = 5;
+    optional float accuracy = 6;
+}
+
+message ApplicationModel
+{
+    optional string name = 1;
+    repeated ModelParameter models = 2;
+}
