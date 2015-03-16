@@ -1,0 +1,16 @@
+models {
+    name: "D0"
+    type: FACE
+    compute: "2.54G"
+    memory: "290.8M"
+    loading_latency: 3237
+    accuracy: 49.6
+}
+models {
+    name: "D1"
+    type: FACE
+    compute: "2.54G"
+    memory: "290.8M"
+    loading_latency: 3237
+    accuracy: 49.6
+}
