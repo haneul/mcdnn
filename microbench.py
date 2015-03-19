@@ -25,7 +25,7 @@ print (end-beg) * 1000
 #print (r3.ru_maxrss - r2.ru_maxrss) / 1024.0
 print "memory (MB): ",
 print (m2-m1) / 1024.0
-IMAGE_FILE = "../cat.jpg"
+IMAGE_FILE = sys.argv[2] 
 input_image = caffe.io.load_image(IMAGE_FILE)
 data=np.asarray([net2.preprocess('data', input_image)])
 for i in range(10):
@@ -34,5 +34,5 @@ beg = time.time()
 prediction = net2.forward_all(data=data)
 end = time.time()
 print "compute time (ms): ",
-print (end-beg) * 1000
+print (end-beg) * 1000 
 
