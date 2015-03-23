@@ -1,89 +1,118 @@
 models {
     name: "D0"
     type: FACE
-    compute: "2.54G"
+    compute: "1.00G"
     memory: "394M"
-    loading_latency: 3237
+    loading_latency: 2531
+    compute_latency: 167.1
     accuracy: 75.7 
 }
 models {
     name: "D1"
     type: FACE
-    compute: "2.54G"
+    compute: "974M"
     memory: "338M"
-    loading_latency: 3237
+    loading_latency: 2170
+    compute_latency: 155.6 
     accuracy: 76.6
 }
 models {
     name: "D2"
     type: FACE
-    compute: "2.54G"
+    compute: "959M"
     memory: "309M"
-    loading_latency: 3237
+    loading_latency: 1985 
+    compute_latency: 150.0
     accuracy: 74.9 
 }
 models {
     name: "D3"
     type: FACE
-    compute: "2.54G"
+    compute: "948M"
     memory: "288M"
-    loading_latency: 3237
+    loading_latency: 1880
+    compute_latency: 146.4 
     accuracy: 74.3 
 }
 models {
     name: "D4"
     type: FACE
-    compute: "2.54G"
+    compute: "605G"
     memory: "394M"
-    loading_latency: 3237
+    loading_latency: 2522
+    compute_latency: 155.0 
     accuracy: 77.5 
 }
 models {
     name: "D5"
     type: FACE
-    compute: "2.54G"
+    compute: "933M"
     memory: "260M"
-    loading_latency: 3237
+    loading_latency: 1667
+    compute_latency: 115.7 
     accuracy: 76.8 
 }
 models {
     name: "D6"
     type: FACE
-    compute: "2.54G"
+    compute: "203M"
     memory: "40M"
-    loading_latency: 3237
+    loading_latency: 284.8
+    compute_latency: 34.36 
     accuracy: 69.2 
 }
 models {
     name: "D7"
     type: FACE
-    compute: "2.54G"
+    compute: "1.00G"
     memory: "155M"
-    loading_latency: 3237
+    loading_latency: 1008
+    compute_latency: 73.80 
     accuracy: 71.2 
 }
 models {
     name: "D8"
     type: FACE
-    compute: "2.54G"
+    compute: "1.00G"
     memory: "354M"
-    loading_latency: 3237
+    loading_latency: 2196.5 
+    compute_latency: 145.2
     accuracy: 78.6
 }
 models {
     name: "D9"
     type: FACE
-    compute: "2.54G"
+    compute: "605M"
     memory: "155M"
-    loading_latency: 3237
+    loading_latency: 985.5
+    compute_latency: 61.6 
     accuracy: 76.2 
 }
 models {
     name: "D10"
     type: FACE
-    compute: "2.54G"
+    compute: "203M"
     memory: "8.3M"
-    loading_latency: 3237
+    loading_latency: 78.57
+    compute_latency: 24.15 
     accuracy: 66.7 
+}
+models {
+    name: "D11"
+    type: FACE
+    compute: "236M"
+    memory: "104M"
+    loading_latency: 670.0 
+    compute_latency: 44.02 
+    accuracy: 75.2 
+}
+models {
+    name: "D12"
+    type: FACE
+    compute: "236M"
+    memory: "73M"
+    loading_latency: 469.6 
+    compute_latency: 37.08 
+    accuracy: 75.6 
 }
 
