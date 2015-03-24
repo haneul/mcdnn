@@ -9,10 +9,13 @@ with open("model_sample.prototxt") as f:
 #    print(model)
 
 energy_budget = 5.*3600 # 5Wh
+#energy_budget = 2.*3600 # 5Wh
 cost_budget = 0.0667 # dollar ($2/month)
+#cost_budget = 0.04 # dollar ($2/month)
 latency_limit = 1000 # 2secs
 RTT = 100 # 100ms
 server_cost = 1.8e-7 # $ per ms
+send_energy = 3.8/1000 # 3.8mJ
 freq = 1.
 
 import pickle
@@ -44,6 +47,7 @@ current = -1
 res = []
 moves = 0
 last_swapin = 0
+prev_acc = 0
 for i in trace:
     if i > 36000: break
 
@@ -78,15 +82,27 @@ for i in trace:
         current = 0  # server!!
         cost_budget -= server_pick.s_compute_latency * server_cost
         pick = server_pick
+        energy_budget -= send_energy
+    elif server_pick.accuracy == client_pick.accuracy and prev_acc == server_pick.accuracy:
+        if current == 0:
+            cost_budget -= server_pick.s_compute_latency * server_cost
+            pick = server_pick
+            energy_budget -= send_energy
+        else:
+            current = 1
+            energy_budget -= client_pick.compute_energy
+            pick = client_pick 
     else:
         if current != 1:
             #print(i, "server->client")
             moves += 1
+            energy_budget -= client_pick.loading_energy
         current = 1  # client
         energy_budget -= client_pick.compute_energy
         pick = client_pick 
 
     res.append((i, energy_budget, cost_budget, pick.accuracy, current))
+    prev_acc = pick.accuracy
 #print(moves)
 import matplotlib.pyplot as plt 
 from mpltools import style
@@ -115,6 +131,7 @@ ax.set_yticks([0, 1])
 ax.set_yticklabels(['server', 'client'])
 #plt.show()
 
+#fig.savefig('schedule_2wh_004.pdf', bbox_inches='tight')
 fig.savefig('schedule1.pdf', bbox_inches='tight')
 
 
