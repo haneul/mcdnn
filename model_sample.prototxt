@@ -5,6 +5,10 @@ models {
     memory: "394M"
     loading_latency: 2531
     compute_latency: 167.1
+    compute_energy: 3.44
+    loading_energy: 13.23
+    s_loading_latency: 1254.64
+    s_compute_latency: 22.02
     accuracy: 75.7 
 }
 models {
@@ -14,6 +18,10 @@ models {
     memory: "338M"
     loading_latency: 2170
     compute_latency: 155.6 
+    compute_energy: 3.26
+    loading_energy: 12.11
+    s_loading_latency: 1079.67
+    s_compute_latency: 21.20
     accuracy: 76.6
 }
 models {
@@ -23,6 +31,10 @@ models {
     memory: "309M"
     loading_latency: 1985 
     compute_latency: 150.0
+    compute_energy: 3.16
+    s_loading_latency: 1041.98
+    s_compute_latency: 20.52
+    loading_energy: 11.01
     accuracy: 74.9 
 }
 models {
@@ -32,6 +44,10 @@ models {
     memory: "288M"
     loading_latency: 1880
     compute_latency: 146.4 
+    compute_energy: 3.1
+    s_loading_latency: 920.86
+    s_compute_latency: 20.48
+    loading_energy: 11.74
     accuracy: 74.3 
 }
 models {
@@ -41,6 +57,10 @@ models {
     memory: "394M"
     loading_latency: 2522
     compute_latency: 155.0 
+    compute_energy: 3.02
+    s_loading_latency: 840.78 
+    s_compute_latency: 21.26
+    loading_energy: 18.44
     accuracy: 77.5 
 }
 models {
@@ -50,6 +70,10 @@ models {
     memory: "260M"
     loading_latency: 1667
     compute_latency: 115.7 
+    compute_energy: 2.56
+    s_loading_latency: 135.79 
+    s_compute_latency: 14.99
+    loading_energy: 10.15
     accuracy: 76.8 
 }
 models {
@@ -59,6 +83,10 @@ models {
     memory: "40M"
     loading_latency: 284.8
     compute_latency: 34.36 
+    compute_energy: 0.54
+    s_loading_latency: 135.79 
+    s_compute_latency: 8.00
+    loading_energy: 5.19
     accuracy: 69.2 
 }
 models {
@@ -68,6 +96,10 @@ models {
     memory: "155M"
     loading_latency: 1008
     compute_latency: 73.80 
+    compute_energy: 2.01
+    s_loading_latency: 505.24 
+    s_compute_latency: 10.47
+    loading_energy: 7.92
     accuracy: 71.2 
 }
 models {
@@ -77,6 +109,10 @@ models {
     memory: "354M"
     loading_latency: 2196.5 
     compute_latency: 145.2
+    compute_energy: 3.29
+    s_loading_latency: 1134.74 
+    s_compute_latency: 17.72
+    loading_energy: 15.6
     accuracy: 78.6
 }
 models {
@@ -86,6 +122,10 @@ models {
     memory: "155M"
     loading_latency: 985.5
     compute_latency: 61.6 
+    compute_energy: 1.53
+    s_loading_latency: 502.00 
+    s_compute_latency: 9.76
+    loading_energy: 7.84
     accuracy: 76.2 
 }
 models {
@@ -95,6 +135,10 @@ models {
     memory: "8.3M"
     loading_latency: 78.57
     compute_latency: 24.15 
+    compute_energy: 0.36
+    s_loading_latency: 51.95 
+    s_compute_latency: 5.49
+    loading_energy: 4.44
     accuracy: 66.7 
 }
 models {
@@ -104,6 +148,10 @@ models {
     memory: "104M"
     loading_latency: 670.0 
     compute_latency: 44.02 
+    compute_energy: 0.79
+    s_loading_latency: 341.19 
+    s_compute_latency: 8.80
+    loading_energy: 6.56
     accuracy: 75.2 
 }
 models {
@@ -113,6 +161,10 @@ models {
     memory: "73M"
     loading_latency: 469.6 
     compute_latency: 37.08 
+    compute_energy: 0.59
+    s_loading_latency: 239.09 
+    s_compute_latency: 37.08
+    loading_energy: 5.92
     accuracy: 75.6 
 }
 

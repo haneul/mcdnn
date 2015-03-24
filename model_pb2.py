@@ -19,7 +19,7 @@ _sym_db = _symbol_database.Default()
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='model.proto',
   package='uw.syhan.mcdnn',
-  serialized_pb=_b('\n\x0bmodel.proto\x12\x0euw.syhan.mcdnn\"\x95\x01\n\x0eModelParameter\x12\x0c\n\x04name\x18\x01 \x01(\t\x12)\n\x04type\x18\x02 \x02(\x0e\x32\x1b.uw.syhan.mcdnn.RequestType\x12\x0f\n\x07\x63ompute\x18\x03 \x01(\t\x12\x0e\n\x06memory\x18\x04 \x01(\t\x12\x17\n\x0floading_latency\x18\x05 \x01(\x02\x12\x10\n\x08\x61\x63\x63uracy\x18\x06 \x01(\x02\"P\n\x10\x41pplicationModel\x12\x0c\n\x04name\x18\x01 \x01(\t\x12.\n\x06models\x18\x02 \x03(\x0b\x32\x1e.uw.syhan.mcdnn.ModelParameter*#\n\x0bRequestType\x12\x08\n\x04\x46\x41\x43\x45\x10\x01\x12\n\n\x06OBJECT\x10\x02')
+  serialized_pb=_b('\n\x0bmodel.proto\x12\x0euw.syhan.mcdnn\"\x94\x02\n\x0eModelParameter\x12\x0c\n\x04name\x18\x01 \x01(\t\x12)\n\x04type\x18\x02 \x02(\x0e\x32\x1b.uw.syhan.mcdnn.RequestType\x12\x0f\n\x07\x63ompute\x18\x03 \x01(\t\x12\x0e\n\x06memory\x18\x04 \x01(\t\x12\x17\n\x0floading_latency\x18\x05 \x01(\x02\x12\x10\n\x08\x61\x63\x63uracy\x18\x06 \x01(\x02\x12\x17\n\x0f\x63ompute_latency\x18\x07 \x01(\x02\x12\x16\n\x0e\x63ompute_energy\x18\x08 \x01(\x02\x12\x19\n\x11s_compute_latency\x18\t \x01(\x02\x12\x19\n\x11s_loading_latency\x18\n \x01(\x02\x12\x16\n\x0eloading_energy\x18\x0b \x01(\x02\"P\n\x10\x41pplicationModel\x12\x0c\n\x04name\x18\x01 \x01(\t\x12.\n\x06models\x18\x02 \x03(\x0b\x32\x1e.uw.syhan.mcdnn.ModelParameter*#\n\x0bRequestType\x12\x08\n\x04\x46\x41\x43\x45\x10\x01\x12\n\n\x06OBJECT\x10\x02')
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -40,8 +40,8 @@ _REQUESTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=265,
-  serialized_end=300,
+  serialized_start=392,
+  serialized_end=427,
 )
 _sym_db.RegisterEnumDescriptor(_REQUESTTYPE)
 
@@ -100,6 +100,41 @@ _MODELPARAMETER = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='compute_latency', full_name='uw.syhan.mcdnn.ModelParameter.compute_latency', index=6,
+      number=7, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='compute_energy', full_name='uw.syhan.mcdnn.ModelParameter.compute_energy', index=7,
+      number=8, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='s_compute_latency', full_name='uw.syhan.mcdnn.ModelParameter.s_compute_latency', index=8,
+      number=9, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='s_loading_latency', full_name='uw.syhan.mcdnn.ModelParameter.s_loading_latency', index=9,
+      number=10, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='loading_energy', full_name='uw.syhan.mcdnn.ModelParameter.loading_energy', index=10,
+      number=11, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -112,7 +147,7 @@ _MODELPARAMETER = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=32,
-  serialized_end=181,
+  serialized_end=308,
 )
 
 
@@ -148,8 +183,8 @@ _APPLICATIONMODEL = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=183,
-  serialized_end=263,
+  serialized_start=310,
+  serialized_end=390,
 )
 
 _MODELPARAMETER.fields_by_name['type'].enum_type = _REQUESTTYPE
