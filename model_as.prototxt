@@ -1,0 +1,104 @@
+models {
+    name: "A0"
+    type: OBJECT 
+    compute: "2.54G"
+    memory: "394M"
+    loading_latency: 3237 
+    compute_latency: 133.9 
+    compute_energy: 3.58 
+    loading_energy: 12.69
+    s_loading_latency: 919 
+    s_compute_latency: 9.23 
+    accuracy: 49.6 
+}
+models {
+    name: "A1"
+    type: OBJECT 
+    compute: "2.46G"
+    memory: "394M"
+    loading_latency: 1401 
+    compute_latency: 94.4 
+    compute_energy: 3.01
+    loading_energy: 7.64 
+    s_loading_latency: 437 
+    s_compute_latency: 7.28 
+    accuracy: 50.0 
+}
+models {
+    name: "A2"
+    type: OBJECT 
+    compute: "2.40G"
+    memory: "394M"
+    loading_latency: 744 
+    compute_latency: 76.4 
+    compute_energy: 2.8 
+    loading_energy: 6.15
+    s_loading_latency: 228 
+    s_compute_latency: 6.96 
+    accuracy: 45.4
+}
+models {
+    name: "A3"
+    type: OBJECT 
+    compute: "2.40G"
+    memory: "394M"
+    loading_latency: 243 
+    compute_latency: 59.6 
+    compute_energy: 2.65 
+    loading_energy: 5.14 
+    s_loading_latency: 74 
+    s_compute_latency: 5.8 
+    accuracy: 43.7 
+}
+models {
+    name: "A4"
+    type: OBJECT 
+    compute: "1.80G"
+    memory: "394M"
+    loading_latency: 1367 
+    compute_latency: 78.3 
+    compute_energy: 2.41 
+    loading_energy: 7.54 
+    s_loading_latency: 424 
+    s_compute_latency: 6.47 
+    accuracy: 43.4 
+}
+models {
+    name: "A5"
+    type: OBJECT 
+    compute: "1.45G"
+    memory: "394M"
+    loading_latency: 1359 
+    compute_latency: 70.9 
+    compute_energy: 1.96 
+    loading_energy: 7.68 
+    s_loading_latency: 423 
+    s_compute_latency: 6.08 
+    accuracy: 42.2 
+}
+models {
+    name: "A6"
+    type: OBJECT 
+    compute: "838M"
+    memory: "394M"
+    loading_latency: 1590 
+    compute_latency: 50.9 
+    compute_energy: 1.6 
+    loading_energy: 8.32 
+    s_loading_latency: 492 
+    s_compute_latency: 6.31 
+    accuracy: 46.0 
+}
+models {
+    name: "A7"
+    type: OBJECT 
+    compute: "792M"
+    memory: "394M"
+    loading_latency: 723
+    compute_latency: 34.8 
+    compute_energy: 1.24 
+    loading_energy: 5.95 
+    s_loading_latency: 236 
+    s_compute_latency: 5.36 
+    accuracy: 42.7 
+}
