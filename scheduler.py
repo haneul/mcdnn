@@ -38,6 +38,7 @@ class Application:
         self.models = models
         self.status = Location.NOTRUNNING
         self.last_swapin = 0
+        self.res = []
 
 import copy
 
@@ -83,6 +84,7 @@ class Scheduler:
             except:
                 client_pick = None
             if client_pick == None and server_pick == None:
+                print(i)
                 raise Exception()
             if client_pick == None or server_pick.accuracy > client_pick.accuracy:
                 if tApp.status != Location.SERVER:
@@ -111,7 +113,8 @@ class Scheduler:
                 self.energy_budget -= client_pick.compute_energy
                 pick = client_pick 
 
-            self.res.append((i, self.energy_budget, self.cost_budget, pick.accuracy, tApp.status))
+            tApp.res.append((i, pick.accuracy, tApp.status))
+            self.res.append((i, self.energy_budget, self.cost_budget))
             prev_acc = pick.accuracy
 
 param = model_pb2.ApplicationModel()
@@ -119,9 +122,17 @@ with open("model_sample.prototxt") as f:
     google.protobuf.text_format.Merge(f.read(), param)
 
 app1 = Application("deepface", 1., param.models)
+
+param2 = model_pb2.ApplicationModel()
+with open("model_as.prototxt") as f:
+    google.protobuf.text_format.Merge(f.read(), param2)
+
+app2 = Application("object-alex", .2, param2.models)
+
 # sheculder 1
 scheduler = Scheduler("test1", 5*3600, 0.0667)
 scheduler.add_application(AppType.FACE, app1)
+scheduler.add_application(AppType.SCENE, app2)
 
 #energy_budget = 2.*3600 # 5Wh
 #cost_budget = 0.04 # dollar ($2/month)
@@ -132,7 +143,13 @@ import pickle
 with open("poi_1.pcl", "rb") as f:
     trace = pickle.load(f)
 
+with open("poi_5.pcl", "rb") as f:
+    trace_5 = pickle.load(f)
+
 trace = map(lambda x:(x, AppType.FACE), trace)
+trace_5 = map(lambda x:(x, AppType.SCENE), trace_5)
+trace = trace + trace_5
+trace.sort(key=lambda x:x[0])
 
 scheduler.rununtil(trace)
 res = scheduler.res
@@ -153,11 +170,16 @@ lns = ln + ln2
 labs = [l.get_label() for l in lns]
 ax.legend(lns, labs, loc=3)
 ax = fig.add_subplot(312)
-ln3 = ax.plot(map(lambda x:x[0], res), map(lambda x:x[3], res), label='Acc')
+r1 = app1.res
+r2 = app2.res
+ln3 = ax.plot(map(lambda x:x[0], r1), map(lambda x:x[1], r1), label='App1')
+ln4 = ax.plot(map(lambda x:x[0], r2), map(lambda x:x[1], r2), label='App1')
+ax.set_ylim(45,80)
 ax.set_ylabel('Accuracy (%)')
 ax.set_xlim(0,36000)
 ax = fig.add_subplot(313)
-ln4 = ax.step(map(lambda x:x[0], res), map(lambda x:x[4], res), where='post', label='Acc')
+ln4 = ax.step(map(lambda x:x[0], r1), map(lambda x:x[2], r1), where='post', label='Acc')
+ln4 = ax.step(map(lambda x:x[0], r2), map(lambda x:x[2], r2), where='post', label='Acc')
 ax.set_xlim(0,36000)
 ax.set_ylim(0.8, 3.2)
 ax.set_yticks([3, 1])
@@ -165,6 +187,6 @@ ax.set_yticklabels(['server', 'client'])
 #plt.show()
 
 #fig.savefig('schedule_2wh_004.pdf', bbox_inches='tight')
-fig.savefig('schedule1.pdf', bbox_inches='tight')
+fig.savefig('schedule2.pdf', bbox_inches='tight')
 
 
