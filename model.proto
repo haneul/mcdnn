@@ -18,6 +18,12 @@ message ModelParameter
     optional float s_compute_latency = 9;
     optional float s_loading_latency = 10;
     optional float loading_energy = 11;
+    optional float sp_loading_energy = 12;
+    optional float sp_compute_energy = 13;
+    optional float sp_loading_latency = 14;
+    optional float sp_compute_latency = 15;
+    optional float sp_s_loading_latency = 16;
+    optional float sp_s_compute_latency = 17;
 }
 
 message ApplicationModel
