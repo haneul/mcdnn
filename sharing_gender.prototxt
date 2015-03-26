@@ -1,0 +1,57 @@
+models {
+    name: "D0"
+    type: FACE_G
+    compute: "1.00G"
+    memory: "394M"
+    loading_latency: 2531
+    compute_latency: 167.1
+    compute_energy: 3.44
+    loading_energy: 13.23
+    s_loading_latency: 1254.64
+    s_compute_latency: 22.02
+    accuracy: 94.7 
+    sp_loading_energy :  8.1
+    sp_compute_energy :  2.53
+    sp_loading_latency :  1762.74
+    sp_compute_latency :  153.67
+    sp_s_loading_latency :  372.34
+    sp_s_compute_latency :  2.22
+}
+models {
+    name: "D6"
+    type: FACE_G
+    compute: "203M"
+    memory: "40M"
+    loading_latency: 284.8
+    compute_latency: 34.36 
+    compute_energy: 0.54
+    s_loading_latency: 135.79 
+    s_compute_latency: 8.00
+    loading_energy: 5.19
+    accuracy: 93.2 
+    sp_loading_energy :  3.42
+    sp_compute_energy :  0.4
+    sp_loading_latency :  235.29
+    sp_compute_latency :  30.64
+    sp_s_loading_latency :  39.2
+    sp_s_compute_latency :  0.86
+}
+models {
+    name: "D10"
+    type: FACE_G
+    compute: "203M"
+    memory: "8.3M"
+    loading_latency: 78.57
+    compute_latency: 24.15 
+    compute_energy: 0.36
+    s_loading_latency: 51.95 
+    s_compute_latency: 5.49
+    loading_energy: 4.44
+    accuracy: 92.7 
+    sp_loading_energy :  2.92
+    sp_compute_energy :  0.25
+    sp_loading_latency :  28.07
+    sp_compute_latency :  22.44
+    sp_s_loading_latency :  30.49
+    sp_s_compute_latency :  1.18
+}
