@@ -24,6 +24,7 @@ message ModelParameter
     optional float sp_compute_latency = 15;
     optional float sp_s_loading_latency = 16;
     optional float sp_s_compute_latency = 17;
+    optional int32 location = 18;
 }
 
 message ApplicationModel
