@@ -13,14 +13,14 @@ send_energy = 3.8/1000 # 3.8mJ
 def check_server(x, RTT, latency_limit):
     return x.s_loading_latency + x.s_compute_latency + RTT <= latency_limit
 
-def check_server_cost(x, cost_budget, remaining_time, server_cost, freq):
-    return (cost_budget / remaining_time / freq) >= (x.s_compute_latency * server_cost)
+def check_server_cost(x, cost_budget, remaining_time, server_cost, freq, sumsqfreq):
+    return freq * (cost_budget / remaining_time / (sumsqfreq + freq*freq)) >= (x.s_compute_latency * server_cost)
 
-def check_device_cost(x, energy_budget, remaining_time, is_away, time_from_last_swap, freq):
+def check_device_cost(x, energy_budget, remaining_time, is_away, time_from_last_swap, freq, sumsqfreq):
     e_b = energy_budget
     if is_away:
         e_b -= x.loading_energy * (remaining_time / float(time_from_last_swap))
-    return (e_b / remaining_time / freq) >= (x.compute_energy)
+    return freq * (e_b / remaining_time / (sumsqfreq + freq*freq)) >= (x.compute_energy)
 
 def check_split_cost(x, energy_budget, cost_budget, remaining_time, is_away, time_from_last_swap, freq):
     e_b = energy_budget
@@ -72,6 +72,9 @@ class Scheduler:
         self.count_stat = [] 
         self.in_context = 0
         self.out_context = 0
+        self.in_cache = {}
+        self.in_cache[Location.DEVICE] = []
+        self.in_cache[Location.SERVER] = []
 
     def add_application(self, app_type, application):
         self.applications[app_type] = application
@@ -105,11 +108,6 @@ class Scheduler:
                         self.in_context -= 1
                     else:
                         self.out_context -= 1
-                    """
-                    self.count_stat_dic[p[1]] -= 1
-                    if self.count_stat_dic[p[1]] == 0:
-                        del self.count_stat_dic[p[1]]
-                    """  
                 cur_per = self.in_context / float(self.in_context + self.out_context) 
                 if cur_per >= 0.6:
                     special_models = tApp.special_models
@@ -119,11 +117,6 @@ class Scheduler:
                             if cur_per < sp.percent: break
                             if sp.accuracy > model.accuracy:
                                 model.accuracy = sp.accuracy
-                """
-                for model in special_models:
-                    print(model)
-                exit(0)
-                """
 
             if self.get_connectivity(i):
                 if len(special_models) > 0:
@@ -146,9 +139,18 @@ class Scheduler:
                 if self.use_split:
                     target_sp = filter(lambda x: check_split(x, RTT, latency_limit), target_sp)
 
-            target_s = filter(lambda x: check_server_cost(x, self.cost_budget, until-i, server_cost, tApp.freq), target_s)
+            freqsqsum = sum(map(lambda x:x.freq*x.freq, self.in_cache[Location.SERVER]))
+            if tApp.status == Location.SERVER:
+                freqsqsum -= (tApp.freq * tApp.freq)
+
+            target_s = filter(lambda x: check_server_cost(x, self.cost_budget, until-i, server_cost, tApp.freq, freqsqsum), target_s)
+
+            freqsqsum = sum(map(lambda x:x.freq*x.freq, self.in_cache[Location.DEVICE]))
+            if tApp.status == Location.DEVICE:
+                freqsqsum -= (tApp.freq * tApp.freq)
+
             target_c = filter(lambda x: check_device_cost(x, self.energy_budget, until-i, tApp.status==Location.SERVER, 
-                (i-tApp.last_swapin), tApp.freq), target_c)
+                (i-tApp.last_swapin), tApp.freq, freqsqsum), target_c)
             if self.use_split:
                 target_sp = filter(lambda x: check_split_cost(x, self.energy_budget, self.cost_budget, until-i, 
                     tApp.status==Location.SERVER or tApp.status==Location.DEVICE, (i-tApp.last_swapin_split), tApp.freq), target_sp)
@@ -194,10 +196,23 @@ class Scheduler:
                 self.cost_budget -= server_pick.s_compute_latency * server_cost
                 self.energy_budget -= send_energy
 
+                if tApp.status != Location.SERVER:
+                    try:
+                        self.in_cache[tApp.status].remove(tApp)
+                    except KeyError:
+                        pass
+                    self.in_cache[pick.location].append(tApp)
+
             elif pick.location == Location.DEVICE:
                 if tApp.status != pick.location:
                     self.energy_budget -= client_pick.loading_energy
                     tApp.last_swapin = i
+                    try:
+                        self.in_cache[tApp.status].remove(tApp)
+                    except KeyError:
+                        pass
+                    self.in_cache[pick.location].append(tApp)
+
                 self.energy_budget -= client_pick.compute_energy
 
             elif pick.location == Location.SPLIT:
@@ -249,11 +264,6 @@ class Scheduler:
             prev_acc = pick.accuracy
 
 
-param2 = model_pb2.ApplicationModel()
-with open("model_as.prototxt") as f:
-    google.protobuf.text_format.Merge(f.read(), param2)
-
-app2 = Application("object-alex", .2, param2.models)
 
 # sheculder 2
 """
@@ -276,25 +286,13 @@ with open("disconnect.pcl", "rb") as f:
 #cost_budget = 0.04 # dollar ($2/month)
 
 
-# load face trace
-with open("poi_1.pcl", "rb") as f:
-    trace = pickle.load(f)
-
-with open("poi_5.pcl", "rb") as f:
-    trace_5 = pickle.load(f)
-
-#trace_5 = map(lambda x:(x, AppType.SCENE), trace_5)
-#trace = trace + trace_5
-#trace.sort(key=lambda x:x[0])
 
 
 import matplotlib.pyplot as plt 
 from mpltools import style
 style.use('ggplot')
 
-def depict(res, r1, filename, ylim=18000):
-    fig = plt.figure()
-    ax = fig.add_subplot(311)
+def plot_energy_and_cost(ax, res, ylim):
     ln = ax.plot(map(lambda x:x[0], res), map(lambda x:x[1], res), c='b', label='Energy')
     ax.set_ylabel('Energy Budget (J)')
     ax.set_ylim(0,ylim)
@@ -305,6 +303,31 @@ def depict(res, r1, filename, ylim=18000):
     lns = ln + ln2
     labs = [l.get_label() for l in lns]
     ax.legend(lns, labs, loc=3)
+
+
+def depict_2(res, r1, r2, filename, ylim=18000):
+    fig = plt.figure()
+    ax = fig.add_subplot(311)
+    ln = plot_energy_and_cost(ax, res, ylim)
+    ax = fig.add_subplot(312)
+    ln3 = ax.plot(map(lambda x:x[0], r1), map(lambda x:x[1], r1), label='App1')
+    ln4 = ax.plot(map(lambda x:x[0], r2), map(lambda x:x[1], r2), label='App1')
+    ax.set_xlim(0,36000)
+    ax.set_ylabel('Accuracy (%)')
+    ax = fig.add_subplot(313)
+    ln4 = ax.step(map(lambda x:x[0], r1), map(lambda x:x[2], r1), where='post', label='Acc')
+    ln4 = ax.step(map(lambda x:x[0], r2), map(lambda x:x[2], r2), where='post', label='Acc')
+    ax.set_xlim(0,36000)
+    ax.set_ylim(0.8, 3.2)
+    ax.set_yticks([3,2, 1])
+    ax.set_yticklabels(['server','split', 'client'])
+    plt.show()
+    fig.savefig(filename, bbox_inches='tight')
+
+def depict(res, r1, filename, ylim=18000):
+    fig = plt.figure()
+    ax = fig.add_subplot(311)
+    ln = plot_energy_and_cost(ax, res, ylim)
     ax = fig.add_subplot(312)
     ln3 = ax.plot(map(lambda x:x[0], r1), map(lambda x:x[1], r1), label='App1')
     ax.set_xlim(0,36000)
@@ -352,6 +375,36 @@ param = model_pb2.ApplicationModel()
 with open("model_sample.prototxt") as f:
     google.protobuf.text_format.Merge(f.read(), param)
 
+# load face trace
+with open("poi_1.pcl", "rb") as f:
+    trace = pickle.load(f)
+
+with open("poi_5.pcl", "rb") as f:
+    trace_5 = pickle.load(f)
+
+#trace_5 = map(lambda x:(x, AppType.SCENE), trace_5)
+#trace = trace + trace_5
+#trace.sort(key=lambda x:x[0])
+param2 = model_pb2.ApplicationModel()
+with open("model_as.prototxt") as f:
+    google.protobuf.text_format.Merge(f.read(), param2)
+
+
+def multipleApps():
+    global trace, trace_5
+    app1 = Application("deepface", .2, param.models)
+    app2 = Application("object-alex", 1, param2.models)
+    scheduler = Scheduler("multi", 2*3600, 0.0667)
+    trace = map(lambda x:(x, AppType.SCENE), trace)
+    trace_5 = map(lambda x:(x, AppType.FACE), trace_5)
+    trace = trace + trace_5
+    trace.sort(key=lambda x:x[0])
+    scheduler.add_application(AppType.FACE, app1)
+    scheduler.add_application(AppType.SCENE, app2)
+    scheduler.rununtil(trace)
+    res = scheduler.res
+    depict_2(res, app1.res, app2.res, "multi.pdf")
+
 def split():
     app1 = Application("deepface", 1., param.models)
     scheduler = Scheduler("split", 2*3600, 0.0667)
@@ -378,9 +431,23 @@ def special():
     scheduler.rununtil(special_trace)
     res = scheduler.res
     depict_special(res, app1.res, "special.pdf", special_trace, 2*3600)
-    
+   
+def sharing():
+    app1 = Application("deepface", .2, param.models)
+    scheduler = Scheduler("sharing", 1*3600, 0.0667)
+    scheduler.add_application(AppType.FACE, app1)
 
-special() 
+    trace = map(lambda x:(x, AppType.FACE), trace_5)
+    scheduler.rununtil(trace)
+
+    res = scheduler.res
+    depict(res, app1.res, "sharing.pdf", 1*3600)
+
+
+
+#special() 
+#sharing()
+multipleApps()
 
 
 """
