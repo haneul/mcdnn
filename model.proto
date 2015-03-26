@@ -13,6 +13,11 @@ message ModelParameter
     optional string memory = 4;
     optional float loading_latency = 5;
     optional float accuracy = 6;
+    optional float compute_latency = 7;
+    optional float compute_energy = 8;
+    optional float s_compute_latency = 9;
+    optional float s_loading_latency = 10;
+    optional float loading_energy = 11;
 }
 
 message ApplicationModel
