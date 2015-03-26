@@ -221,9 +221,6 @@ scheduler.add_application(AppType.SCENE, app2)
 """
 
 # split
-scheduler = Scheduler("split", 5*3600, 0.0667)
-scheduler.add_application(AppType.FACE, app1)
-scheduler.use_split = True
 #scheduler.add_application(AppType.SCENE, app2)
 
 import pickle
@@ -244,13 +241,10 @@ with open("poi_1.pcl", "rb") as f:
 with open("poi_5.pcl", "rb") as f:
     trace_5 = pickle.load(f)
 
-trace = map(lambda x:(x, AppType.FACE), trace)
 #trace_5 = map(lambda x:(x, AppType.SCENE), trace_5)
 #trace = trace + trace_5
 #trace.sort(key=lambda x:x[0])
 
-scheduler.rununtil(trace)
-res = scheduler.res
 
 import matplotlib.pyplot as plt 
 from mpltools import style
@@ -282,7 +276,22 @@ def depict(res, r1, filename):
     plt.show()
     fig.savefig(filename, bbox_inches='tight')
 
-depict(res, app1.res, "split.pdf")
+def split():
+    scheduler = Scheduler("split", 5*3600, 0.0667)
+    scheduler.add_application(AppType.FACE, app1)
+    scheduler.use_split = True
+    trace = map(lambda x:(x, AppType.FACE), trace)
+
+    scheduler.rununtil(trace)
+    res = scheduler.res
+    depict(res, app1.res, "split.pdf")
+
+def special():
+    param2 = model_pb2.ApplicationModel()
+    with open("special_models.prototxt") as f:
+        google.protobuf.text_format.Merge(f.read(), param2)
+
+special() 
 
 
 """

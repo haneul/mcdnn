@@ -1,0 +1,50 @@
+models {
+   name: "C0"
+   loading_energy: 4.46
+   compute_energy: 0.55
+   loading_latency: 545.96
+   compute_latency: 34.93
+   s_loading_latency: 281.64
+   s_compute_latency: 5.98
+   special: {
+      accuracy: 88.1
+      number: 7
+      percent: 0.6
+   }
+}
+models {
+   name: "C1"
+   loading_energy: 3.61
+   compute_energy: 0.42
+   loading_latency: 257.39
+   compute_latency: 28.73
+   s_loading_latency: 136.32
+   s_compute_latency: 5.39
+}
+models {
+   name: "C2"
+   loading_energy: 3.19
+   compute_energy: 0.32
+   loading_latency: 120.28
+   compute_latency: 19.39
+   s_loading_latency: 63.86
+   s_compute_latency: 3.8
+}
+models {
+   name: "C3"
+   loading_energy: 2.82
+   compute_energy: 0.22
+   loading_latency: 28.49
+   compute_latency: 17.22
+   s_loading_latency: 17.8
+   s_compute_latency: 3.67
+}
+models {
+   name: "C4"
+   loading_energy: 2.8
+   compute_energy: 0.057
+   loading_latency: 16.86
+   compute_latency: 8.21
+   s_loading_latency: 7.07
+   s_compute_latency: 2.39
+}
