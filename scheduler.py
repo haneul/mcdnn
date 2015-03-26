@@ -40,7 +40,7 @@ class Application:
         self.last_swapin = 0
         self.res = []
 
-import copy
+import bisect 
 
 class Scheduler:
     def __init__(self, name, energy_budget, cost_budget):
@@ -49,9 +49,19 @@ class Scheduler:
         self.cost_budget = float(cost_budget)
         self.applications = {} 
         self.res = []
+        self.connectivity = [(0,True)]
+        self.connectivity_times = [0]
 
     def add_application(self, app_type, application):
         self.applications[app_type] = application
+
+    def set_connectivity(self, conn):
+        self.connectivity = conn
+        self.connectivity_times = map(lambda x:x[0], conn)
+
+    def get_connectivity(self, i):
+        j = bisect.bisect_left(self.connectivity_times, i)
+        return self.connectivity[j-1][1]
 
     def rununtil(self, trace, until=36000):
         moves = 0
@@ -61,7 +71,10 @@ class Scheduler:
             i = cur[0]
             if i > until: break
 
-            target_s = tApp.models
+            if self.get_connectivity(i):
+                target_s = tApp.models
+            else:
+                target_s = []
             target_c = tApp.models
             # server_side
             if tApp.status == Location.NOTRUNNING: # cold miss
@@ -84,9 +97,10 @@ class Scheduler:
             except:
                 client_pick = None
             if client_pick == None and server_pick == None:
-                print(i)
-                raise Exception()
-            if client_pick == None or server_pick.accuracy > client_pick.accuracy:
+                tApp.status = Location.NOTRUNNING
+                tApp.res.append((i, 0, tApp.status))
+                continue
+            if server_pick != None and (client_pick == None or server_pick.accuracy > client_pick.accuracy):
                 if tApp.status != Location.SERVER:
                     #print(i, "client->server")
                     moves += 1
@@ -94,7 +108,7 @@ class Scheduler:
                 self.cost_budget -= server_pick.s_compute_latency * server_cost
                 pick = server_pick
                 self.energy_budget -= send_energy
-            elif server_pick.accuracy == client_pick.accuracy and prev_acc == server_pick.accuracy:
+            elif server_pick != None and (server_pick.accuracy == client_pick.accuracy and prev_acc == server_pick.accuracy):
                 if tApp.status == Location.SERVER:
                     self.cost_budget -= server_pick.s_compute_latency * server_cost
                     pick = server_pick
@@ -129,15 +143,20 @@ with open("model_as.prototxt") as f:
 
 app2 = Application("object-alex", .2, param2.models)
 
-# sheculder 1
+# sheculder 2
 scheduler = Scheduler("test1", 5*3600, 0.0667)
 scheduler.add_application(AppType.FACE, app1)
 scheduler.add_application(AppType.SCENE, app2)
 
+import pickle
+# connectivity test
+with open("disconnect.pcl", "rb") as f:
+    conn = pickle.load(f)
+    scheduler.set_connectivity(conn)
+
 #energy_budget = 2.*3600 # 5Wh
 #cost_budget = 0.04 # dollar ($2/month)
 
-import pickle
 
 # load face trace
 with open("poi_1.pcl", "rb") as f:
@@ -158,10 +177,11 @@ import matplotlib.pyplot as plt
 from mpltools import style
 style.use('ggplot')
 fig = plt.figure()
-
+"""
 ax = fig.add_subplot(311)
 ln = ax.plot(map(lambda x:x[0], res), map(lambda x:x[1], res), c='b', label='Energy')
 ax.set_ylabel('Energy Budget (J)')
+ax.set_ylim(0,18000)
 ax2 = ax.twinx()
 ln2 = ax2.plot(map(lambda x:x[0], res), map(lambda x:x[2], res), label='Cost')
 ax2.set_ylabel('Cost Budget ($)')
@@ -184,9 +204,44 @@ ax.set_xlim(0,36000)
 ax.set_ylim(0.8, 3.2)
 ax.set_yticks([3, 1])
 ax.set_yticklabels(['server', 'client'])
+"""
 #plt.show()
+ax = fig.add_subplot(411)
+ln = ax.plot(map(lambda x:x[0], res), map(lambda x:x[1], res), c='b', label='Energy')
+ax.set_ylabel('Energy Budget (J)')
+ax.set_ylim(0,18000)
+ax2 = ax.twinx()
+ln2 = ax2.plot(map(lambda x:x[0], res), map(lambda x:x[2], res), label='Cost')
+ax2.set_ylabel('Cost Budget ($)')
+ax.set_xlim(0,36000)
+lns = ln + ln2
+labs = [l.get_label() for l in lns]
+ax.legend(lns, labs, loc=3)
+ax = fig.add_subplot(412)
+r1 = app1.res
+r2 = app2.res
+ln3 = ax.plot(map(lambda x:x[0], r1), map(lambda x:x[1], r1), label='App1')
+ln4 = ax.plot(map(lambda x:x[0], r2), map(lambda x:x[1], r2), label='App1')
+ax.set_ylim(45,80)
+ax.set_ylabel('Accuracy (%)')
+ax.set_xlim(0,36000)
+ax = fig.add_subplot(413)
+ln4 = ax.step(map(lambda x:x[0], r1), map(lambda x:x[2], r1), where='post', label='Acc')
+ln4 = ax.step(map(lambda x:x[0], r2), map(lambda x:x[2], r2), where='post', label='Acc')
+ax.set_xlim(0,36000)
+ax.set_ylim(0.8, 3.2)
+ax.set_yticks([3, 1])
+ax.set_yticklabels(['server', 'client'])
+ax = fig.add_subplot(414)
+ln4 = ax.step(map(lambda x:x[0], conn), map(lambda x:x[1], conn), where='post', label='Acc')
+ax.set_ylabel('Connectivity')
+ax.set_xlim(0,36000)
+ax.set_ylim(-0.2,1.2)
+ax.set_yticks([0, 1])
+ax.set_yticklabels(['Disconnected', 'Connected'])
 
 #fig.savefig('schedule_2wh_004.pdf', bbox_inches='tight')
-fig.savefig('schedule2.pdf', bbox_inches='tight')
+#fig.savefig('schedule2.pdf', bbox_inches='tight')
+fig.savefig('schedule_disconn.pdf', bbox_inches='tight')
 
 
