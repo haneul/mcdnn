@@ -41,7 +41,7 @@ class Location:
     NOTRUNNING, DEVICE, SPLIT, SERVER = range(0,4)
 
 class AppType:
-    FACE, OBJECT, SCENE = range(3)
+    FACE, OBJECT, SCENE, FACE_V = range(4)
 
 class Application:
     def __init__(self, name, freq, models, special_models=[]):
@@ -58,12 +58,14 @@ class Application:
 import bisect 
 stat_duration = 5*60 # 5min
 
+import collections
+
 class Scheduler:
     def __init__(self, name, energy_budget, cost_budget):
         self.name = name
         self.energy_budget = float(energy_budget)
         self.cost_budget = float(cost_budget)
-        self.applications = {} 
+        self.applications = collections.defaultdict(list) 
         self.res = []
         self.connectivity = [(0,True)]
         self.connectivity_times = [0]
@@ -77,7 +79,7 @@ class Scheduler:
         self.in_cache[Location.SERVER] = []
 
     def add_application(self, app_type, application):
-        self.applications[app_type] = application
+        self.applications[app_type].append(application)
 
     def set_connectivity(self, conn):
         self.connectivity = conn
@@ -92,7 +94,7 @@ class Scheduler:
         prev_acc = 0
         for cur in trace:
             special_models = []
-            tApp = self.applications[cur[-1]]
+            tApp = self.applications[cur[-1]][0]
             i = cur[0]
             if i > until: break
             if self.use_specialize and i>stat_duration:
@@ -433,21 +435,31 @@ def special():
     depict_special(res, app1.res, "special.pdf", special_trace, 2*3600)
    
 def sharing():
+    param = model_pb2.ApplicationModel()
+    with open("sharing_test.prototxt") as f:
+        google.protobuf.text_format.Merge(f.read(), param)
+
     app1 = Application("deepface", .2, param.models)
-    scheduler = Scheduler("sharing", 1*3600, 0.0667)
+    scheduler = Scheduler("sharing", 2*3600, 0.0667)
     scheduler.add_application(AppType.FACE, app1)
+
+    param_g = model_pb2.ApplicationModel()
+    with open("sharing_gender.prototxt") as f:
+        google.protobuf.text_format.Merge(f.read(), param_g)
+    app2 = Application("deepface-g", .2, param.models)
+    scheduler.add_application(AppType.FACE_V, app2)
 
     trace = map(lambda x:(x, AppType.FACE), trace_5)
     scheduler.rununtil(trace)
 
     res = scheduler.res
-    depict(res, app1.res, "sharing.pdf", 1*3600)
+    depict_2(res, app1.res, app2.res,"sharing.pdf", 2*3600)
 
 
 
 #special() 
-#sharing()
-multipleApps()
+sharing()
+#multipleApps()
 
 
 """
