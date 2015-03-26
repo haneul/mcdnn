@@ -10,6 +10,12 @@ models {
     s_loading_latency: 1254.64
     s_compute_latency: 22.02
     accuracy: 75.7 
+    sp_loading_energy :  8.1
+    sp_compute_energy :  2.53
+    sp_loading_latency :  1762.74
+    sp_compute_latency :  153.67
+    sp_s_loading_latency :  372.34
+    sp_s_compute_latency :  2.22
 }
 models {
     name: "D1"
@@ -23,6 +29,12 @@ models {
     s_loading_latency: 1079.67
     s_compute_latency: 21.20
     accuracy: 76.6
+    sp_loading_energy :  4.55
+    sp_compute_energy :  2.48
+    sp_loading_latency :  1762.73
+    sp_compute_latency :  153.51
+    sp_s_loading_latency :  201.95
+    sp_s_compute_latency :  1.47
 }
 models {
     name: "D2"
@@ -36,6 +48,12 @@ models {
     s_compute_latency: 20.52
     loading_energy: 11.01
     accuracy: 74.9 
+    sp_loading_energy :  4.42
+    sp_compute_energy :  2.58
+    sp_loading_latency :  1775.6
+    sp_compute_latency :  154.14
+    sp_s_loading_latency :  100.99
+    sp_s_compute_latency :  1.18
 }
 models {
     name: "D3"
@@ -49,6 +67,12 @@ models {
     s_compute_latency: 20.48
     loading_energy: 11.74
     accuracy: 74.3 
+    sp_loading_energy :  4.37
+    sp_compute_energy :  2.56
+    sp_loading_latency :  1767.17
+    sp_compute_latency :  156.95
+    sp_s_loading_latency :  42.18
+    sp_s_compute_latency :  0.85
 }
 models {
     name: "D4"
@@ -62,6 +86,12 @@ models {
     s_compute_latency: 21.26
     loading_energy: 18.44
     accuracy: 77.5 
+    sp_loading_energy :  7.63
+    sp_compute_energy :  2.15
+    sp_loading_latency :  1804.57
+    sp_compute_latency :  143.75
+    sp_s_loading_latency :  376.25
+    sp_s_compute_latency :  2.19
 }
 models {
     name: "D5"
@@ -75,6 +105,12 @@ models {
     s_compute_latency: 14.99
     loading_energy: 10.15
     accuracy: 76.8 
+    sp_loading_energy :  4.06
+    sp_compute_energy :  1.8
+    sp_loading_latency :  943.7
+    sp_compute_latency :  93.69
+    sp_s_loading_latency :  376.24
+    sp_s_compute_latency :  2.2
 }
 models {
     name: "D6"
@@ -88,6 +124,12 @@ models {
     s_compute_latency: 8.00
     loading_energy: 5.19
     accuracy: 69.2 
+    sp_loading_energy :  3.42
+    sp_compute_energy :  0.4
+    sp_loading_latency :  235.29
+    sp_compute_latency :  30.64
+    sp_s_loading_latency :  39.2
+    sp_s_compute_latency :  0.86
 }
 models {
     name: "D7"
@@ -101,6 +143,12 @@ models {
     s_compute_latency: 10.47
     loading_energy: 7.92
     accuracy: 71.2 
+    sp_loading_energy :  3.74
+    sp_compute_energy :  1.29
+    sp_loading_latency :  278.74
+    sp_compute_latency :  53.06
+    sp_s_loading_latency :  375.17
+    sp_s_compute_latency :  2.21
 }
 models {
     name: "D8"
@@ -114,6 +162,12 @@ models {
     s_compute_latency: 17.72
     loading_energy: 15.6
     accuracy: 78.6
+    sp_loading_energy :  8.07
+    sp_compute_energy :  2.35
+    sp_loading_latency :  1523.36
+    sp_compute_latency :  134.58
+    sp_s_loading_latency :  376.49
+    sp_s_compute_latency :  2.21
 }
 models {
     name: "D9"
@@ -127,6 +181,12 @@ models {
     s_compute_latency: 9.76
     loading_energy: 7.84
     accuracy: 76.2 
+    sp_loading_energy :  2.51
+    sp_compute_energy :  0.9
+    sp_loading_latency :  278.18
+    sp_compute_latency :  42.5
+    sp_s_loading_latency :  373.66
+    sp_s_compute_latency :  2.18
 }
 models {
     name: "D10"
@@ -140,6 +200,12 @@ models {
     s_compute_latency: 5.49
     loading_energy: 4.44
     accuracy: 66.7 
+    sp_loading_energy :  2.92
+    sp_compute_energy :  0.25
+    sp_loading_latency :  28.07
+    sp_compute_latency :  22.44
+    sp_s_loading_latency :  30.49
+    sp_s_compute_latency :  1.18
 }
 models {
     name: "D11"
@@ -153,6 +219,12 @@ models {
     s_compute_latency: 8.80
     loading_energy: 6.56
     accuracy: 75.2 
+    sp_loading_energy :  3.51
+    sp_compute_energy :  0.41
+    sp_loading_latency :  233.94
+    sp_compute_latency :  29.5
+    sp_s_loading_latency :  323.96
+    sp_s_compute_latency :  1.74
 }
 models {
     name: "D12"
@@ -166,5 +238,11 @@ models {
     s_compute_latency: 37.08
     loading_energy: 5.92
     accuracy: 75.6 
+    sp_loading_energy :  2.88
+    sp_compute_energy :  0.25
+    sp_loading_latency :  28.36
+    sp_compute_latency :  23.31
+    sp_s_loading_latency :  235.46
+    sp_s_compute_latency :  1.7
 }
 
