@@ -44,7 +44,7 @@ class AppType:
     FACE, OBJECT, SCENE = range(3)
 
 class Application:
-    def __init__(self, name, freq, models):
+    def __init__(self, name, freq, models, special_models=[]):
         self.name = name
         self.freq = float(freq)
         self.models = models
@@ -52,8 +52,11 @@ class Application:
         self.last_swapin = 0
         self.last_swapin_split = 0
         self.res = []
+        self.specializable = len(special_models)>0 
+        self.special_models = special_models
 
 import bisect 
+stat_duration = 5*60 # 5min
 
 class Scheduler:
     def __init__(self, name, energy_budget, cost_budget):
@@ -65,6 +68,10 @@ class Scheduler:
         self.connectivity = [(0,True)]
         self.connectivity_times = [0]
         self.use_split = False
+        self.use_specialize = True
+        self.count_stat = [] 
+        self.in_context = 0
+        self.out_context = 0
 
     def add_application(self, app_type, application):
         self.applications[app_type] = application
@@ -81,17 +88,57 @@ class Scheduler:
         moves = 0
         prev_acc = 0
         for cur in trace:
-            tApp = self.applications[cur[1]]
+            special_models = []
+            tApp = self.applications[cur[-1]]
             i = cur[0]
             if i > until: break
+            if self.use_specialize and i>stat_duration:
+                self.count_stat.append((i, cur[1]))
+                if cur[1] < 7:
+                    self.in_context += 1
+                else:
+                    self.out_context += 1
+
+                while self.count_stat[0][0] < i-stat_duration:
+                    p = self.count_stat.pop(0)
+                    if p[1] < 7:
+                        self.in_context -= 1
+                    else:
+                        self.out_context -= 1
+                    """
+                    self.count_stat_dic[p[1]] -= 1
+                    if self.count_stat_dic[p[1]] == 0:
+                        del self.count_stat_dic[p[1]]
+                    """  
+                cur_per = self.in_context / float(self.in_context + self.out_context) 
+                if cur_per >= 0.6:
+                    special_models = tApp.special_models
+                    for model in special_models:
+                        model.accuracy = 0
+                        for sp in model.special:
+                            if cur_per < sp.percent: break
+                            if sp.accuracy > model.accuracy:
+                                model.accuracy = sp.accuracy
+                """
+                for model in special_models:
+                    print(model)
+                exit(0)
+                """
 
             if self.get_connectivity(i):
-                target_s = tApp.models
+                if len(special_models) > 0:
+                    target_s = special_models
+                else:
+                    target_s = tApp.models
             else:
                 target_s = []
-            target_c = tApp.models
+
+            if len(special_models) > 0:
+                target_c = special_models
+            else:
+                target_c = tApp.models
             if self.use_split:
-                target_sp = tApp.models
+                target_sp = tApp.models + special_models
             # server_side
             if tApp.status == Location.NOTRUNNING: # cold miss
                 target_s = filter(lambda x: check_server(x, RTT, latency_limit), target_s) 
@@ -201,11 +248,6 @@ class Scheduler:
             self.res.append((i, self.energy_budget, self.cost_budget))
             prev_acc = pick.accuracy
 
-param = model_pb2.ApplicationModel()
-with open("model_sample.prototxt") as f:
-    google.protobuf.text_format.Merge(f.read(), param)
-
-app1 = Application("deepface", 1., param.models)
 
 param2 = model_pb2.ApplicationModel()
 with open("model_as.prototxt") as f:
@@ -250,12 +292,12 @@ import matplotlib.pyplot as plt
 from mpltools import style
 style.use('ggplot')
 
-def depict(res, r1, filename):
+def depict(res, r1, filename, ylim=18000):
     fig = plt.figure()
     ax = fig.add_subplot(311)
     ln = ax.plot(map(lambda x:x[0], res), map(lambda x:x[1], res), c='b', label='Energy')
     ax.set_ylabel('Energy Budget (J)')
-    ax.set_ylim(0,18000)
+    ax.set_ylim(0,ylim)
     ax2 = ax.twinx()
     ln2 = ax2.plot(map(lambda x:x[0], res), map(lambda x:x[2], res), label='Cost')
     ax2.set_ylabel('Cost Budget ($)')
@@ -276,8 +318,43 @@ def depict(res, r1, filename):
     plt.show()
     fig.savefig(filename, bbox_inches='tight')
 
+def depict_special(res, r1, filename, sp_trace, ylim=18000):
+    fig = plt.figure()
+    ax = fig.add_subplot(411)
+    ln = ax.plot(map(lambda x:x[0], res), map(lambda x:x[1], res), c='b', label='Energy')
+    ax.set_ylabel('Energy Budget (J)')
+    ax.set_ylim(0,ylim)
+    ax2 = ax.twinx()
+    ln2 = ax2.plot(map(lambda x:x[0], res), map(lambda x:x[2], res), label='Cost')
+    ax2.set_ylabel('Cost Budget ($)')
+    ax.set_xlim(0,36000)
+    lns = ln + ln2
+    labs = [l.get_label() for l in lns]
+    ax.legend(lns, labs, loc=3)
+    ax = fig.add_subplot(412)
+    ln3 = ax.plot(map(lambda x:x[0], r1), map(lambda x:x[1], r1), label='App1')
+    ax.set_xlim(0,36000)
+    ax.set_ylabel('Accuracy (%)')
+    ax = fig.add_subplot(413)
+    ln4 = ax.step(map(lambda x:x[0], r1), map(lambda x:x[2], r1), where='post', label='Acc')
+    ax.set_xlim(0,36000)
+    ax.set_ylim(0.8, 3.2)
+    ax.set_yticks([3, 1])
+    ax.set_yticklabels(['server', 'client'])
+    ax = fig.add_subplot(414)
+    ax.scatter(map(lambda x:x[0], sp_trace), map(lambda x:x[1], sp_trace))
+    ax.set_xlim(0,36000)
+    ax.set_ylim(0,200)
+    plt.show()
+    fig.savefig(filename, bbox_inches='tight')
+
+param = model_pb2.ApplicationModel()
+with open("model_sample.prototxt") as f:
+    google.protobuf.text_format.Merge(f.read(), param)
+
 def split():
-    scheduler = Scheduler("split", 5*3600, 0.0667)
+    app1 = Application("deepface", 1., param.models)
+    scheduler = Scheduler("split", 2*3600, 0.0667)
     scheduler.add_application(AppType.FACE, app1)
     scheduler.use_split = True
     trace = map(lambda x:(x, AppType.FACE), trace)
@@ -290,6 +367,18 @@ def special():
     param2 = model_pb2.ApplicationModel()
     with open("special_models.prototxt") as f:
         google.protobuf.text_format.Merge(f.read(), param2)
+    app1 = Application("deepface", .2, param.models, param2.models)
+
+    with open("special_trace.pcl", "rb") as f:
+        special_trace = pickle.load(f)
+        special_trace = map(lambda x:(x[0], x[1], AppType.FACE), special_trace)
+    scheduler = Scheduler("special", 2*3600, 0.0667)
+    scheduler.use_specialize = True
+    scheduler.add_application(AppType.FACE, app1)
+    scheduler.rununtil(special_trace)
+    res = scheduler.res
+    depict_special(res, app1.res, "special.pdf", special_trace, 2*3600)
+    
 
 special() 
 

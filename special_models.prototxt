@@ -11,6 +11,21 @@ models {
       number: 7
       percent: 0.6
    }
+   special: {
+      accuracy: 91.0 
+      number: 7
+      percent: 0.8 
+   }
+   special: {
+      accuracy: 94.9 
+      number: 7
+      percent: 0.9 
+   }
+   special: {
+      accuracy: 96.2
+      number: 7
+      percent: 0.95
+   }
 }
 models {
    name: "C1"
@@ -20,6 +35,26 @@ models {
    compute_latency: 28.73
    s_loading_latency: 136.32
    s_compute_latency: 5.39
+   special: {
+      accuracy: 87.5
+      number: 7
+      percent: 0.6
+   }
+   special: {
+      accuracy: 90.0 
+      number: 7
+      percent: 0.8 
+   }
+   special: {
+      accuracy: 93.7 
+      number: 7
+      percent: 0.9 
+   }
+   special: {
+      accuracy: 95.8 
+      number: 7
+      percent: 0.95
+   }
 }
 models {
    name: "C2"
@@ -29,6 +64,26 @@ models {
    compute_latency: 19.39
    s_loading_latency: 63.86
    s_compute_latency: 3.8
+   special: {
+      accuracy: 82.1
+      number: 7
+      percent: 0.6
+   }
+   special: {
+      accuracy: 90
+      number: 7
+      percent: 0.8 
+   }
+   special: {
+      accuracy: 94.0
+      number: 7
+      percent: 0.9 
+   }
+   special: {
+      accuracy: 95.8 
+      number: 7
+      percent: 0.95
+   }
 }
 models {
    name: "C3"
@@ -38,6 +93,26 @@ models {
    compute_latency: 17.22
    s_loading_latency: 17.8
    s_compute_latency: 3.67
+   special: {
+      accuracy: 87.3
+      number: 7
+      percent: 0.6
+   }
+   special: {
+      accuracy: 85 
+      number: 7
+      percent: 0.8 
+   }
+   special: {
+      accuracy: 92.2 
+      number: 7
+      percent: 0.9 
+   }
+   special: {
+      accuracy: 94.5 
+      number: 7
+      percent: 0.95
+   }
 }
 models {
    name: "C4"
@@ -47,4 +122,24 @@ models {
    compute_latency: 8.21
    s_loading_latency: 7.07
    s_compute_latency: 2.39
+   special: {
+      accuracy: 74.1 
+      number: 7
+      percent: 0.6
+   }
+   special: {
+      accuracy: 78 
+      number: 7
+      percent: 0.8 
+   }
+   special: {
+      accuracy: 84.4 
+      number: 7
+      percent: 0.9 
+   }
+   special: {
+      accuracy: 87.5 
+      number: 7
+      percent: 0.95
+   }
 }

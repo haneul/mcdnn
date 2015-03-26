@@ -6,8 +6,8 @@ proportion = 0.001
 total_n = 200
 
 import random
-target_n = 14
-p = 0.8
+target_n = 7
+p = 0.65
 
 until = 36000
 current = 0
@@ -32,11 +32,14 @@ while True:
     else:
         dice = random.random()
         if dice < p:
-            pick = random.randint(0, target_n)
+            pick = random.randint(0, target_n-1)
         else:
-            pick = random.randint(target_n+1, 199)
+            pick = random.randint(target_n, 199)
     res.append((current, pick))
 
+import pickle
+with open("special_trace.pcl", "wb") as f:
+    pickle.dump(res, f)
 
 import matplotlib.pyplot as plt 
 from mpltools import style
@@ -54,6 +57,5 @@ plt.ylabel("person ID")
 plt.xlabel("time")
 plt.ylim(0,200)
 plt.xlim(0,10800)
-plt.show()
+#plt.show()
 fig.savefig('specialized.pdf', bbox_inches='tight')
-
