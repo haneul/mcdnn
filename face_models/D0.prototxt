@@ -25,6 +25,7 @@ layers {
     kernel_size: 3
     stride: 2
     pad: 1
+    calc: FLOOR
   }
 }
 layers {

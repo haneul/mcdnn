@@ -1,5 +1,6 @@
 import caffe
 import numpy as np
+import time
 
 
 #with open("/home/haichen/datasets/MITPlaces/trainvalsplit_places205/val_places205.csv", "r")  as f:
@@ -26,6 +27,7 @@ lcnt = 0
 BATCH = 256
 rr = []
 #BATCH = 256
+beg = time.time()
 for i in range(len(lines)/BATCH+1):
     images = []
     for line in lines[i*BATCH:(i+1)*BATCH]:
@@ -44,7 +46,7 @@ for i in range(len(lines)/BATCH+1):
         cnt += 1
     lcnt += 1
     print(str(lcnt*BATCH) + "/" + str(len(lines)))
-print(rr)
+    break
+end = time.time()
 print(sum(res)/float(len(res)))
-print(sum(res))
-print(len(res))
+print(end-beg)

@@ -18,8 +18,8 @@ def main():
                            channel_swap=(2,1,0),
                            raw_scale=255,
                            image_dims=(256, 256)) 
-    net.set_phase_test()
-    net.set_mode_gpu()
+    caffe.set_phase_test()
+    caffe.set_mode_gpu()
     input_image = caffe.io.load_image(IMAGE_FILE)
     #prediction = net.predict([input_image])
     prediction = net.forward_all(data=np.asarray([net.preprocess('data', input_image)]))
@@ -35,8 +35,8 @@ def main():
 
 SETTINGS = {
     "imagenet": {
-        "model_file": "tlc/var2.6.Model.prototxt",
-        "pretrained": "tlc/var2.6.Model.caffemodel",
+        "model_file":  "../../haichen/models/caffe/A0.prototxt",
+        "pretrained":  "../../haichen/models/caffe/A0.caffemodel",
         "image_dims": (256, 256),
         "input_dims": [224, 224],
         "oversample": False,
@@ -66,13 +66,13 @@ def main_tlc():
     np.set_printoptions(threshold='nan')
 
     options = SETTINGS["imagenet"]
-    #IMAGE_FILE = "../cat.jpg"
-    IMAGE_FILE = "../fish.jpg"
+    IMAGE_FILE = "../cat.jpg"
+    #IMAGE_FILE = "../fish.jpg"
     mean = np.zeros([3] + list(options['input_dims']))
     mean.fill(128.0)
-    #with open("synset_words.txt") as f:
-    #    words = f.readlines()
-    #words = map(lambda x: x.strip(), words)
+    with open("/home/haichen/datasets/imagenet/meta/2010/synset_words.txt") as f:
+        words = f.readlines()
+    words = map(lambda x: x.strip(), words)
    
     net = caffe.Classifier(options["model_file"], options["pretrained"],
                            mean=mean, input_scale=0.0078125,
@@ -80,8 +80,8 @@ def main_tlc():
     sys.stderr.write("model file: %s\n" % options["model_file"])
     sys.stderr.write("pretrained: %s\n" % options["pretrained"])
 
-    net.set_phase_test()
-    net.set_mode_gpu()
+    caffe.set_phase_test()
+    caffe.set_mode_gpu()
     #net.set_mode_cpu()
     """
     with open("rawinput.txt") as f:
@@ -101,7 +101,7 @@ def main_tlc():
     #for i,v in enumerate(prediction[0]):
     #    print i, v
     print label
-    #print words[label]
+    print words[label]
     #print input_image
 
 #main()
