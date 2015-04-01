@@ -35,27 +35,35 @@ def main():
 
 SETTINGS = {
     "imagenet": {
-        "model_file":  "../../haichen/models/caffe/A0.prototxt",
-        "pretrained":  "../../haichen/models/caffe/A0.caffemodel",
+        "model_file": "var6.8.Model.prototxt",
+        "pretrained": "var6.8.Model.caffemodel",
         "image_dims": (256, 256),
         "input_dims": [224, 224],
         "oversample": False,
+        "raw": "fish.rawinput.txt",
+        "sep": ",",
     },
     "deepface": {
-        "model_file": "tlc/faces/var5.5.Model.prototxt",
-        "pretrained": "tlc/faces/var5.5.Model.caffemodel",
-        #"model_file": "tlc/faces/faces.var5.rm6.prototxt",
-        #"pretrained": "tlc/faces/faces.var5.rm6.caffemodel",
+        #"model_file": "lconv/context_specific.14.Model.prototxt",
+        #"pretrained": "lconv/context_specific.14.Model.caffemodel",
+        "model_file": "models/D6.prototxt",
+        "pretrained": "models/D6.caffemodel",
+        #"model_file": "lconv/cs.rm2.prototxt",
+        #"pretrained": "lconv/cs.rm2.caffemodel",
         "image_dims": (152, 152),
         "input_dims": [152, 152],
         "oversample": False,
+        "raw": "face.rawinput.txt",
+        "sep": ",",
     },
     "test": {
-        "model_file": "test.prototxt",
-        "pretrained": "test.caffemodel",
+        "model_file": "testnn/local_test_mid.prototxt",
+        "pretrained": "testnn/local_test_mid.caffemodel",
         "image_dims": (3, 3),
         "input_dims": [3, 3],
         "oversample": False,
+        "raw": "testnn/local_input_mid.txt",
+        "sep": "\t",
     }
 }
 
@@ -83,15 +91,14 @@ def main_tlc():
     caffe.set_phase_test()
     caffe.set_mode_gpu()
     #net.set_mode_cpu()
-    """
-    with open("rawinput.txt") as f:
+   
+    with open(options["raw"]) as f:
         content = f.read()
-        rawinput = content.strip(' ,\t\r\n').split(',')
+        rawinput = content.strip(' ,\t\r\n').split(options["sep"])
         rawinput = map(lambda x: eval(x), rawinput)
     rawinput = np.asarray(rawinput).reshape([1,3] + options['input_dims'])
     prediction = net.predict_raw(rawinput)
     return
-    """
 
     input_image = skimage.io.imread(IMAGE_FILE)
     prediction = net.predict([input_image], oversample=True)
