@@ -19,9 +19,7 @@ MODEL_FILE="../vggnet/VGG_ILSVRC_19_layers.prototxt"
 PRETRAINED="../vggnet/VGG_ILSVRC_19_layers.caffemodel"
 net = caffe.Classifier(MODEL_FILE, PRETRAINED, 
         mean=np.load(caffe_dir + '/python/caffe/imagenet/ilsvrc_2012_mean.npy'),
-        gpu=True, channel_swap=(2,1,0), image_dims=(256,256), raw_scale=255, batch=10)
-caffe.set_phase_test()
-caffe.set_mode_gpu()
+        gpu=True, channel_swap=(2,1,0), image_dims=(256,256), raw_scale=255, batch=1)
 #with open("synset_words.txt") as f:
 #    words = f.readlines()
 with open("/home/haichen/datasets/imagenet/meta/2012/synset_words_caffe.txt") as f:
@@ -34,6 +32,13 @@ from example import *
 #lbl = face_recognition(os.path.join(data_path, "iu/112.jpg"), [152,152], [152,152], os.path.join(model_path, "D0.prototxt"), os.path.join(model_path, "D0.caffemodel"))
 #net = face_net([152,152], [152,152], os.path.join(model_path, "D0.bottom.prototxt"), os.path.join(model_path, "D0.bottom.caffemodel"))
 face_net1 = face_net([152,152], [152,152], os.path.join(model_path, "D0.prototxt"), os.path.join(model_path, "D0.caffemodel"))
+caffe.set_phase_test()
+caffe.set_mode_gpu()
+
+with open("/home/haichen/datasets/MSRBingFaces/facelabels.txt") as f:
+    face_words = f.readlines()[1:]
+face_words = map(lambda x: x.strip(), face_words)
+
 """
 input_image = skimage.io.imread(sys.argv[1])
 prepared = face_input_prepare(net, [input_image]) 
@@ -70,30 +75,39 @@ class MyTCPHandler(SocketServer.StreamRequestHandler):
         req = request_pb2.DNNRequest()
         req.ParseFromString(payload)
 
-        t1 = time.time()
         """
         with open("test.jpg", "wb") as f:
             f.write(req.data)
         input_image = caffe.io.load_image("test.jpg")
         """
-        t2 = time.time()
         if(req.type == request_pb2.FACE):
             print("starting prediction")
             input_image = load_face_from_memory(req.data)
             prepared = face_input_prepare(face_net1, [input_image]) 
             out = face_net1.forward_all(**{face_net1.inputs[0]: prepared})
             #out2 = face_net2.forward_all(**{face_net2.inputs[0]: out["Result"]})
-            print(out2["prob"].argmax())
-            return
+            i = out["prob"].argmax()
+            label = face_words[i]
+            print(i, label)
         else:
         #prediction = net.forward_all(data=np.asarray([net.preprocess('data', input_image)]))
             input_image = load_image_from_memory(req.data)
-            prediction = net.predict([input_image])
-            print(prediction)
+            t1 = time.time()
+            images = np.asarray(caffe.io.oversample([input_image], net.crop_dims))
+            caffe_in = np.zeros(np.array(images.shape)[[0,3,1,2]],
+                             dtype=np.float32)
+            for ix, in_ in enumerate(images):
+                caffe_in[ix] = net.preprocess('data', in_)
+            t2 = time.time()
+            out = net.forward_all(data=caffe_in)
             t3 = time.time()
+            prediction = out[net.outputs[0]].squeeze(axis=(2,3))
+            prediction = prediction.reshape((len(prediction) / 10, 10, -1))
+            prediction = prediction.mean(1)
             i = prediction.argmax()
             label = words[i]
             print(i, label)
+            print(t2-t1, t3-t2)
 
         print "{} wrote:".format(self.client_address[0])
         response = request_pb2.DNNResponse()
