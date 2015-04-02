@@ -1,5 +1,6 @@
 #fields = ["sp_loading_energy", "sp_compute_energy", "sp_loading_latency", "sp_compute_latency", "sp_s_loading_latency", "sp_s_compute_latency"]
-fields = ["name", "loading_energy", "compute_energy", "loading_latency", "compute_latency", "s_loading_latency", "s_compute_latency"]
+#fields = ["name", "loading_energy", "compute_energy", "loading_latency", "compute_latency", "s_loading_latency", "s_compute_latency"]
+fields = ["name", "loading_energy", "compute_energy",  "loading_latency", "compute_latency", "accuracy", "s_loading_latency", "s_compute_latency"]
 with open("t", "r") as f:
     lines = f.readlines()
     for line in lines:
