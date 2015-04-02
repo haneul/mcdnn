@@ -1,0 +1,40 @@
+models {
+   name: "Places205"
+   loading_energy: 12.9
+   compute_energy: 0.22
+   loading_latency: 4117.37
+   compute_latency: 81.48
+   accuracy: 51.6
+   s_loading_latency: 2869.69
+   s_compute_latency: 6.56
+}
+models {
+   name: "SVD-3(1k,1k)"
+   loading_energy: 5.26
+   compute_energy: 0.13
+   loading_latency: 830
+   compute_latency: 51.64
+   accuracy: 51.53
+   s_loading_latency: 443.39
+   s_compute_latency: 5.56
+}
+models {
+   name: "SVD-6(256,512)"
+   loading_energy: 4.16
+   compute_energy: 0.12
+   loading_latency: 460.92
+   compute_latency: 37.38
+   accuracy: 50.68
+   s_loading_latency: 336.88
+   s_compute_latency: 4.63
+}
+models {
+   name: "SVD-12(128,128)"
+   loading_energy: 3.77
+   compute_energy: 0.1
+   loading_latency: 355.02
+   compute_latency: 33.52
+   accuracy: 48.27
+   s_loading_latency: 288.62
+   s_compute_latency: 4.37
+}

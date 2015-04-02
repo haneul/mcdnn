@@ -1,6 +1,6 @@
 models {
     name: "D0"
-    type: FACE_G
+    type: FACE
     compute: "1.00G"
     memory: "394M"
     loading_latency: 2531
@@ -19,7 +19,7 @@ models {
 }
 models {
     name: "D6"
-    type: FACE_G
+    type: FACE
     compute: "203M"
     memory: "40M"
     loading_latency: 284.8
@@ -38,7 +38,7 @@ models {
 }
 models {
     name: "D10"
-    type: FACE_G
+    type: FACE
     compute: "203M"
     memory: "8.3M"
     loading_latency: 78.57
