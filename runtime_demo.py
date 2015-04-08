@@ -126,10 +126,16 @@ while True:
     if key & 0xFF == ord('q'):
         break
     elif key & 0xFF == ord('c'):
+        beg_obj = time.time()
         lastlabel = sendFrame(frame)
+        end_obj = time.time()
+        print(end_obj-beg_obj)
         puttext_time = time.time()
     elif key & 0xFF == ord('f'):
         face_mode = not face_mode
+    elif key & 0xFF == ord('s'):
+        lastlabel = sendFrame(frame, request_pb2.SCENE)
+        puttext_time = time.time()
     #cnt += 1
     #if cnt == 100: break
 end = time.time()
