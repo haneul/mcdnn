@@ -9,16 +9,24 @@ cap.set(4,400)
 target = "faces/"
 #name = "matthai+philipose/"
 #name = "seungyeop+han/"
-name = "test"
+name = "test/"
 faceCount = 0 
 lastshot = 0
+turn = 0
+collectFace = False
+lastTurn = 0  
 while True:
     ret, frame = cap.read()
+    #if faceCount % 20 == 0 and lastTurn != faceCount:
+    #    raw_input("turn %d" % turn)
+    #    lastTurn = faceCount
+    #    turn += 1
+
     if ret:
-        cv2.imshow('frame', frame)
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         now = time.time()
-        if (now-lastshot) > 3:
+        faces = []
+        if collectFace and (now-lastshot) > 0.2:
             faces = faceCascade.detectMultiScale(
                 gray,
                 scaleFactor = 1.2,
@@ -33,11 +41,22 @@ while True:
             cv2.imwrite("%s%s%d.jpg" % (target, name, faceCount), face) 
             faceCount += 1
             lastshot = now
+            cv2.rectangle(frame, (x,y), (x+w,y+h), (0,0,255)) 
+        cv2.imshow('frame', frame)
+        if collectFace and (faceCount % 20 == 0) and lastTurn != faceCount:
+            collectFace = False
+            lastTurn = faceCount
+            print("paused %d" % faceCount)
         if(faceCount >= 100): break
     else:
         print("wrong")
     key = cv2.waitKey(1) 
     if key & 0xFF == ord('q'):
         break
+    elif key & 0xFF == ord('f'):
+        print("restarted %d" % turn)
+        turn += 1
+        collectFace = True
+
 cap.release()
 cv2.destroyAllWindows()    
