@@ -3,6 +3,7 @@ package uw.syhan.mcdnn;
 enum RequestType {
     FACE = 1;
     OBJECT = 2;
+    SCENE = 3;
 };
 
 message DNNRequest {
