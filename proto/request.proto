@@ -16,4 +16,5 @@ message DNNResponse {
     optional double latency = 2;
     optional int32 result = 3;
     optional string result_str = 4;
+    optional double confidence = 5;
 };

@@ -14,7 +14,7 @@ from google.protobuf import descriptor_pb2
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='request.proto',
   package='uw.syhan.mcdnn',
-  serialized_pb='\n\rrequest.proto\x12\x0euw.syhan.mcdnn\"T\n\nDNNRequest\x12)\n\x04type\x18\x01 \x02(\x0e\x32\x1b.uw.syhan.mcdnn.RequestType\x12\r\n\x05layer\x18\x02 \x01(\x05\x12\x0c\n\x04\x64\x61ta\x18\x03 \x01(\x0c\"S\n\x0b\x44NNResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07latency\x18\x02 \x01(\x01\x12\x0e\n\x06result\x18\x03 \x01(\x05\x12\x12\n\nresult_str\x18\x04 \x01(\t*#\n\x0bRequestType\x12\x08\n\x04\x46\x41\x43\x45\x10\x01\x12\n\n\x06OBJECT\x10\x02')
+  serialized_pb='\n\rrequest.proto\x12\x0euw.syhan.mcdnn\"T\n\nDNNRequest\x12)\n\x04type\x18\x01 \x02(\x0e\x32\x1b.uw.syhan.mcdnn.RequestType\x12\r\n\x05layer\x18\x02 \x01(\x05\x12\x0c\n\x04\x64\x61ta\x18\x03 \x01(\x0c\"g\n\x0b\x44NNResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07latency\x18\x02 \x01(\x01\x12\x0e\n\x06result\x18\x03 \x01(\x05\x12\x12\n\nresult_str\x18\x04 \x01(\t\x12\x12\n\nconfidence\x18\x05 \x01(\x01*#\n\x0bRequestType\x12\x08\n\x04\x46\x41\x43\x45\x10\x01\x12\n\n\x06OBJECT\x10\x02')
 
 _REQUESTTYPE = _descriptor.EnumDescriptor(
   name='RequestType',
@@ -33,8 +33,8 @@ _REQUESTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=204,
-  serialized_end=239,
+  serialized_start=224,
+  serialized_end=259,
 )
 
 RequestType = enum_type_wrapper.EnumTypeWrapper(_REQUESTTYPE)
@@ -120,6 +120,13 @@ _DNNRESPONSE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='confidence', full_name='uw.syhan.mcdnn.DNNResponse.confidence', index=4,
+      number=5, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -130,7 +137,7 @@ _DNNRESPONSE = _descriptor.Descriptor(
   is_extendable=False,
   extension_ranges=[],
   serialized_start=119,
-  serialized_end=202,
+  serialized_end=222,
 )
 
 _DNNREQUEST.fields_by_name['type'].enum_type = _REQUESTTYPE

@@ -31,9 +31,11 @@ data_path = "/home/haichen/datasets/MSRBingFaces/"
 from example import * 
 #lbl = face_recognition(os.path.join(data_path, "iu/112.jpg"), [152,152], [152,152], os.path.join(model_path, "D0.prototxt"), os.path.join(model_path, "D0.caffemodel"))
 #net = face_net([152,152], [152,152], os.path.join(model_path, "D0.bottom.prototxt"), os.path.join(model_path, "D0.bottom.caffemodel"))
-face_net1 = face_net([152,152], [152,152], os.path.join(model_path, "D0.prototxt"), os.path.join(model_path, "D0.caffemodel"))
+face_net1 = face_net([152,152], [152,152], os.path.join(model_path, "D0.prototxt"), os.path.join(model_path, "D0.caffemodel"), 1)
+face_net2 = caffe.Net("test_face/test.prototxt", "test_face/face_retarget2_train_iter_8050.caffemodel", 1)
 caffe.set_phase_test()
 caffe.set_mode_gpu()
+target1 = ["iu", "barack+obama", "bill+gates", "dr.+dre", "britney+spears", "angelina+jolie", "eminem", "j.k.+rowling", "g-dragon", "dakota+fanning", "bruce+willis", "colin+powell", "seungyeop+han", "matthai+philipose", "jitu+padhye", "haichen+shen", "alec+wolman", "ganesh+ananthanarayanan", "victor+bahl"]
 
 with open("/home/haichen/datasets/MSRBingFaces/facelabels.txt") as f:
     face_words = f.readlines()[1:]
@@ -74,6 +76,7 @@ class MyTCPHandler(SocketServer.StreamRequestHandler):
         payload = self.read_n(length)
         req = request_pb2.DNNRequest()
         req.ParseFromString(payload)
+        prob = 0
 
         """
         with open("test.jpg", "wb") as f:
@@ -82,12 +85,17 @@ class MyTCPHandler(SocketServer.StreamRequestHandler):
         """
         if(req.type == request_pb2.FACE):
             print("starting prediction")
-            input_image = load_face_from_memory(req.data)
+            #input_image = load_face_from_memory(req.data)
+            input_image = load_image_from_memory(req.data) 
             prepared = face_input_prepare(face_net1, [input_image]) 
-            out = face_net1.forward_all(**{face_net1.inputs[0]: prepared})
-            #out2 = face_net2.forward_all(**{face_net2.inputs[0]: out["Result"]})
-            i = out["prob"].argmax()
-            label = face_words[i]
+            #out = face_net1.forward_all(**{face_net1.inputs[0]: prepared})
+            out = face_net1.forward(end="Result", **{face_net1.inputs[0]: prepared})
+            out2 = face_net2.forward_all(**{face_net2.inputs[0]: out["Result"]})
+            i = out2["prob"].argmax()
+            prob = out2["prob"].squeeze(axis=(2,3))[0][i]
+            print(prob)
+            #label = face_words[i]
+            label = target1[i]
             print(i, label)
         else:
         #prediction = net.forward_all(data=np.asarray([net.preprocess('data', input_image)]))
@@ -104,8 +112,12 @@ class MyTCPHandler(SocketServer.StreamRequestHandler):
             prediction = out[net.outputs[0]].squeeze(axis=(2,3))
             prediction = prediction.reshape((len(prediction) / 10, 10, -1))
             prediction = prediction.mean(1)
+            top5 = prediction.argsort()[0][-5:]
             i = prediction.argmax()
             label = words[i]
+            top5_label = map(lambda x:words[x].split(" ",1)[1].split(",")[0], top5)
+            top5_label.reverse()
+            label = ": ".join(top5_label)
             print(i, label)
             print(t2-t1, t3-t2)
 
@@ -114,6 +126,7 @@ class MyTCPHandler(SocketServer.StreamRequestHandler):
         response.success = True
         response.result = i
         response.result_str = label
+        #response.confidence = prob
         s = response.SerializeToString()
         packed_len = struct.pack('>L', len(s))
         # Likewise, self.wfile is a file-like object used to write back

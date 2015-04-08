@@ -2,12 +2,12 @@ import caffe
 import numpy as np
 import skimage.io
 
-def face_net(image_dim, input_dim, model_file, pretrained):
+def face_net(image_dim, input_dim, model_file, pretrained, batch=10):
     mean = np.zeros([3] + input_dim)
     scale = 0.00390625
     net = caffe.Classifier(model_file, pretrained, 
         mean=mean, input_scale=scale,
-        image_dims=image_dim)
+        image_dims=image_dim, batch=batch)
     #caffe.set_phase_test()
     #net.set_mode_gpu()
     return net
