@@ -52,7 +52,7 @@ def sendFrame(frame, typ=request_pb2.OBJECT):
     finally:
         sock.close()
     if msg != None:
-        return msg.result_str
+        return msg.result_str, msg.latency*1000
      
 
 cascPath = "opencv_xml/haarcascade_frontalface_default.xml"
@@ -77,14 +77,15 @@ fps_list = []
 last_fps_update = time.time()
 cur_fps = -1
 import face_util
-
+ct = 0
+latency = 0
 while True:
     ret, frame = cap.read()
     if not ret:
         continue
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     #gray = cv2.resize(gray, (320, 200), interpolation = cv2.INTER_CUBIC) 
-    gray = cv2.resize(gray, (320, 240), interpolation = cv2.INTER_CUBIC) 
+    gray = cv2.resize(gray, (160, 120), interpolation = cv2.INTER_CUBIC) 
     put = False
     face = False
     now = time.time()
@@ -98,7 +99,7 @@ while True:
             gray,
             scaleFactor = 1.2,
             minNeighbors = 5,
-            minSize=(62, 62),
+            minSize=(31, 31),
             flags = cv2.cv.CV_HAAR_SCALE_IMAGE
         )
         #last_face_t = now 
@@ -109,13 +110,13 @@ while True:
     cv2.rectangle(frame, (0,0), (640,50), (0,0,0), -1)
     for x, y, w, h in faces:
         print("Face found!")
-        x, y, w, h = map(lambda x:2*x, [x,y,w,h]) 
+        x, y, w, h = map(lambda x:4*x, [x,y,w,h]) 
         cv2.rectangle(frame, (x,y), (x+w,y+h), (0,0,255)) 
-        label = sendFrame(frame[y:y+h, x:x+w], request_pb2.FACE)
-        retval, buf = cv2.imencode(".jpg", frame[y:y+h, x:x+w])
+        label, latency = sendFrame(frame[y:y+h, x:x+w], request_pb2.FACE)
+        #retval, buf = cv2.imencode(".jpg", frame[y:y+h, x:x+w])
         #label2 = face_util.detect_face(frame[y:y+h, x:x+w])
-        label2 = face_util.detect_face(img_util.load_image_from_memory(buf))
-        print(label, label2)
+        #label2 = face_util.detect_face(img_util.load_image_from_memory(buf))
+        #print(label, label2)
         put = True
         lastlabel = label
         label_list.append( (now, label) )
@@ -136,9 +137,19 @@ while True:
 
     if now-last_fps_update > 1:
         last_fps_update = now
-        cur_fps = len(fps_list)
+        fps = []
+        prev = fps_list[0]
+        for i in fps_list[1:]:
+            fps.append(i-prev)
+            prev = i
+        if len(fps) > 0:
+            cur_fps = len(fps)/float(sum(fps))
+        else:
+            cur_fps = -1
+        ct = latency
 
-    cv2.putText(frame,"fps: %d" % cur_fps, (550,30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 2)
+    cv2.putText(frame,"fps: %.2f" % cur_fps, (550,30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 2)
+    cv2.putText(frame,"dnn: %.2fms" % ct, (400,30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 2)
 
     cv2.imshow('frame', frame)
     key = cv2.waitKey(1) 
@@ -146,14 +157,14 @@ while True:
         break
     elif key & 0xFF == ord('c'):
         beg_obj = time.time()
-        lastlabel = sendFrame(frame)
+        lastlabel, ct = sendFrame(frame)
         end_obj = time.time()
         print(end_obj-beg_obj)
         puttext_time = time.time()
     elif key & 0xFF == ord('f'):
         face_mode = not face_mode
     elif key & 0xFF == ord('s'):
-        lastlabel = sendFrame(frame, request_pb2.SCENE)
+        lastlabel, ct = sendFrame(frame, request_pb2.SCENE)
         puttext_time = time.time()
     #cnt += 1
     #if cnt == 100: break
