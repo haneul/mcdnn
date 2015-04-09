@@ -2,7 +2,7 @@ import os
 import caffe
 model_path = "face_models"
 from example import * 
-target1 = ["iu", "barack+obama", "bill+gates", "dr.+dre", "britney+spears", "angelina+jolie", "eminem", "j.k.+rowling", "g-dragon", "dakota+fanning", "bruce+willis", "colin+powell", "seungyeop+han", "matthai+philipose", "jitu+padhye", "haichen+shen", "alec+wolman", "ganesh+ananthanarayanan", "victor+bahl", "peter+bodik", "ratul+mahajan"]
+target1 = ["iu", "barack+obama", "bill+gates", "dr.+dre", "britney+spears", "angelina+jolie", "eminem", "j.k.+rowling", "g-dragon", "dakota+fanning", "bruce+willis", "colin+powell", "seungyeop+han", "matthai+philipose", "jitu+padhye", "haichen+shen", "alec+wolman", "ganesh+ananthanarayanan", "victor+bahl", "peter+bodik", "ratul+mahajan", "aakanksha+chowdhery"]
 other_words = [["-30", "30-60", "60+"], ["White", "Black", "Hispanic", "S.Asian", "E.Asian", "Other"], ["M", "F"]]
 
 
