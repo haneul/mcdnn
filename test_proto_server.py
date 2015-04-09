@@ -33,13 +33,26 @@ from example import *
 #net = face_net([152,152], [152,152], os.path.join(model_path, "D0.bottom.prototxt"), os.path.join(model_path, "D0.bottom.caffemodel"))
 face_net1 = face_net([152,152], [152,152], os.path.join(model_path, "D0.prototxt"), os.path.join(model_path, "D0.caffemodel"), 1)
 face_net2 = caffe.Net("test_face/test.prototxt", "test_face/face_retarget2_train_iter_8050.caffemodel", 1)
-caffe.set_phase_test()
-caffe.set_mode_gpu()
-target1 = ["iu", "barack+obama", "bill+gates", "dr.+dre", "britney+spears", "angelina+jolie", "eminem", "j.k.+rowling", "g-dragon", "dakota+fanning", "bruce+willis", "colin+powell", "seungyeop+han", "matthai+philipose", "jitu+padhye", "haichen+shen", "alec+wolman", "ganesh+ananthanarayanan", "victor+bahl"]
+target1 = ["iu", "barack+obama", "bill+gates", "dr.+dre", "britney+spears", "angelina+jolie", "eminem", "j.k.+rowling", "g-dragon", "dakota+fanning", "bruce+willis", "colin+powell", "seungyeop+han", "matthai+philipose", "jitu+padhye", "haichen+shen", "alec+wolman", "ganesh+ananthanarayanan", "victor+bahl", "peter+bodik", "ratul+mahajan"]
 
 with open("/home/haichen/datasets/MSRBingFaces/facelabels.txt") as f:
     face_words = f.readlines()[1:]
 face_words = map(lambda x: x.strip(), face_words)
+
+MODEL_FILE = "/home/haichen/models/caffe/places205.prototxt"
+PRETRAINED = "/home/haichen/models/caffe/places205.caffemodel"
+MEAN = "/home/haichen/models/caffe/places205_mean.binaryproto"
+with open(MEAN, "rb") as f:
+    blob = caffe.proto.caffe_pb2.BlobProto()
+    blob.ParseFromString(f.read())
+    mean_arr = caffe.io.blobproto_to_array(blob)
+
+with open("scene.txt") as f:
+    scene_words = map(lambda x:x.strip(), f.readlines())
+
+scene_net = caffe.Classifier(MODEL_FILE, PRETRAINED, mean=mean_arr[0], gpu=True, channel_swap=(2,1,0), raw_scale=255, image_dims=(256,256))
+caffe.set_phase_test()
+caffe.set_mode_gpu()
 
 """
 input_image = skimage.io.imread(sys.argv[1])
@@ -97,6 +110,30 @@ class MyTCPHandler(SocketServer.StreamRequestHandler):
             #label = face_words[i]
             label = target1[i]
             print(i, label)
+        elif(req.type == request_pb2.SCENE):
+            print("scene")
+            input_image = load_image_from_memory(req.data)
+            t1 = time.time()
+            images = np.asarray(caffe.io.oversample([input_image], scene_net.crop_dims))
+            caffe_in = np.zeros(np.array(images.shape)[[0,3,1,2]],
+                             dtype=np.float32)
+            for ix, in_ in enumerate(images):
+                caffe_in[ix] = scene_net.preprocess('data', in_)
+            t2 = time.time()
+            out = scene_net.forward_all(data=caffe_in)
+            t3 = time.time()
+            prediction = out[scene_net.outputs[0]].squeeze(axis=(2,3))
+            prediction = prediction.reshape((len(prediction) / 10, 10, -1))
+            prediction = prediction.mean(1)
+            top5 = prediction.argsort()[0][-5:]
+            i = prediction.argmax()
+            label = scene_words[i]
+            top5_label = map(lambda x:scene_words[x].split("\t")[1], top5)
+            top5_label.reverse()
+            label = ": ".join(top5_label)
+            print(i, label)
+            print(t2-t1, t3-t2)
+
         else:
         #prediction = net.forward_all(data=np.asarray([net.preprocess('data', input_image)]))
             input_image = load_image_from_memory(req.data)
