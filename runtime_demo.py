@@ -8,6 +8,7 @@ import cv
 import cv2
 import time
 import collections
+import img_util
 
 def send_message(sock, message):
     s = message.SerializeToString()
@@ -62,8 +63,8 @@ print("here?")
 print(cap.get(3))
 print(cap.get(4))
 cap.set(3,640)
-cap.set(4,400)
-#cap.set(4,480)
+#cap.set(4,400)
+cap.set(4,480)
 cnt = 0
 beg = time.time()
 last_face_t = 0
@@ -75,13 +76,15 @@ face_mode = False
 fps_list = []
 last_fps_update = time.time()
 cur_fps = -1
+import face_util
+
 while True:
     ret, frame = cap.read()
     if not ret:
         continue
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    gray = cv2.resize(gray, (320, 200), interpolation = cv2.INTER_CUBIC) 
-    #gray = cv2.resize(gray, (320, 240), interpolation = cv2.INTER_CUBIC) 
+    #gray = cv2.resize(gray, (320, 200), interpolation = cv2.INTER_CUBIC) 
+    gray = cv2.resize(gray, (320, 240), interpolation = cv2.INTER_CUBIC) 
     put = False
     face = False
     now = time.time()
@@ -109,6 +112,10 @@ while True:
         x, y, w, h = map(lambda x:2*x, [x,y,w,h]) 
         cv2.rectangle(frame, (x,y), (x+w,y+h), (0,0,255)) 
         label = sendFrame(frame[y:y+h, x:x+w], request_pb2.FACE)
+        retval, buf = cv2.imencode(".jpg", frame[y:y+h, x:x+w])
+        #label2 = face_util.detect_face(frame[y:y+h, x:x+w])
+        label2 = face_util.detect_face(img_util.load_image_from_memory(buf))
+        print(label, label2)
         put = True
         lastlabel = label
         label_list.append( (now, label) )
