@@ -72,6 +72,9 @@ lastlabel = ""
 label_list = []
 print("start reading")
 face_mode = False
+fps_list = []
+last_fps_update = time.time()
+cur_fps = -1
 while True:
     ret, frame = cap.read()
     if not ret:
@@ -82,8 +85,12 @@ while True:
     put = False
     face = False
     now = time.time()
+    fps_list.append(now)
+    for i in fps_list:
+        if now - i > 1:
+            fps_list.remove(i)
     faces = []
-    if face_mode and (now-last_face_t) > 5:
+    if face_mode and (now-last_face_t) > 0.1:
         faces = faceCascade.detectMultiScale(
             gray,
             scaleFactor = 1.2,
@@ -120,6 +127,11 @@ while True:
     if now-puttext_time < 10:
         cv2.putText(frame,lastlabel, (10,30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 2)
 
+    if now-last_fps_update > 1:
+        last_fps_update = now
+        cur_fps = len(fps_list)
+
+    cv2.putText(frame,"fps: %d" % cur_fps, (550,30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 2)
 
     cv2.imshow('frame', frame)
     key = cv2.waitKey(1) 
