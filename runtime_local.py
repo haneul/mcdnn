@@ -10,6 +10,9 @@ import time
 import collections
 import face_util
 import img_util
+import argparse
+
+
 
 cascPath = "opencv_xml/haarcascade_frontalface_default.xml"
 faceCascade = cv2.CascadeClassifier(cascPath)
@@ -39,12 +42,21 @@ class Option:
         self.sharing = sharing 
         self.gpu = True
 
+parser = argparse.ArgumentParser(prog='mcdnn')
+parser.add_argument('--cpu', action="store_true", default=False)
+parser.add_argument('--nocompact', action="store_false", default=False)
+parser.add_argument('--nosharing', action="store_false", default=False)
+parser.add_argument('--others', action="store_true", default=False)
+args = parser.parse_args()
 o = Option()
-o.target = "D0"
-#o.target = "C0"
-o.others = False 
-o.sharing = True 
-o.gpu = True
+if args.nocompact:
+    o.target = "D0"
+else:
+    o.target = "C0"
+
+o.others = args.others 
+o.sharing =  not args.nosharing 
+o.gpu = not args.cpu
 fn1, fn2, others = face_util.load_net(o)
 compute_t = 0
 ct = 0
