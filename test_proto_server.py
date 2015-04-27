@@ -35,7 +35,7 @@ from example import *
 #face_net2 = caffe.Net("test_face/test.prototxt", "test_face/face_retarget2_train_iter_8050.caffemodel", 1)
 face_net1 = face_net([152,152], [152,152], os.path.join(model_path, "C0.prototxt"), os.path.join(model_path, "C0.caffemodel"), 1)
 face_net2 = caffe.Net("test_face_c0/test.prototxt", "test_face_c0/face_retarget2_train_iter_8050.caffemodel", 1)
-target1 = ["iu", "barack+obama", "bill+gates", "dr.+dre", "britney+spears", "angelina+jolie", "eminem", "j.k.+rowling", "g-dragon", "dakota+fanning", "bruce+willis", "colin+powell", "seungyeop+han", "matthai+philipose", "jitu+padhye", "haichen+shen", "alec+wolman", "ganesh+ananthanarayanan", "victor+bahl", "peter+bodik", "ratul+mahajan", "aakanksha+chowdhery"]
+target1 = ["iu", "barack+obama", "bill+gates", "dr.+dre", "britney+spears", "angelina+jolie", "eminem", "j.k.+rowling", "g-dragon", "dakota+fanning", "bruce+willis", "colin+powell", "seungyeop+han", "matthai+philipose", "jitu+padhye", "haichen+shen", "alec+wolman", "ganesh+ananthanarayanan", "victor+bahl", "peter+bodik", "ratul+mahajan", "aakanksha+chowdhery", "arvind+krishnamurthy"]
 
 with open("/home/haichen/datasets/MSRBingFaces/facelabels.txt") as f:
     face_words = f.readlines()[1:]
@@ -92,6 +92,7 @@ class MyTCPHandler(SocketServer.StreamRequestHandler):
         req = request_pb2.DNNRequest()
         req.ParseFromString(payload)
         prob = 0
+        latency = 0
 
         """
         with open("test.jpg", "wb") as f:
@@ -101,6 +102,7 @@ class MyTCPHandler(SocketServer.StreamRequestHandler):
         if(req.type == request_pb2.FACE):
             print("starting prediction")
             #input_image = load_face_from_memory(req.data)
+            t1 = time.time()
             input_image = load_image_from_memory(req.data) 
             prepared = face_input_prepare(face_net1, [input_image]) 
             #out = face_net1.forward_all(**{face_net1.inputs[0]: prepared})
@@ -108,6 +110,8 @@ class MyTCPHandler(SocketServer.StreamRequestHandler):
             out2 = face_net2.forward_all(**{face_net2.inputs[0]: out["Result"]})
             i = out2["prob"].argmax()
             prob = out2["prob"].squeeze(axis=(2,3))[0][i]
+            t2 = time.time()
+            latency = t2-t1
             print(prob)
             #label = face_words[i]
             label = target1[i]
@@ -121,20 +125,20 @@ class MyTCPHandler(SocketServer.StreamRequestHandler):
                              dtype=np.float32)
             for ix, in_ in enumerate(images):
                 caffe_in[ix] = scene_net.preprocess('data', in_)
-            t2 = time.time()
             out = scene_net.forward_all(data=caffe_in)
-            t3 = time.time()
             prediction = out[scene_net.outputs[0]].squeeze(axis=(2,3))
             prediction = prediction.reshape((len(prediction) / 10, 10, -1))
             prediction = prediction.mean(1)
             top5 = prediction.argsort()[0][-5:]
             i = prediction.argmax()
+            t2 = time.time()
+            latency = t2-t1
             label = scene_words[i]
             top5_label = map(lambda x:scene_words[x].split("\t")[1], top5)
             top5_label.reverse()
             label = ": ".join(top5_label)
+
             print(i, label)
-            print(t2-t1, t3-t2)
 
         else:
         #prediction = net.forward_all(data=np.asarray([net.preprocess('data', input_image)]))
@@ -145,26 +149,26 @@ class MyTCPHandler(SocketServer.StreamRequestHandler):
                              dtype=np.float32)
             for ix, in_ in enumerate(images):
                 caffe_in[ix] = net.preprocess('data', in_)
-            t2 = time.time()
             out = net.forward_all(data=caffe_in)
-            t3 = time.time()
             prediction = out[net.outputs[0]].squeeze(axis=(2,3))
             prediction = prediction.reshape((len(prediction) / 10, 10, -1))
             prediction = prediction.mean(1)
             top5 = prediction.argsort()[0][-5:]
             i = prediction.argmax()
+            t2 = time.time()
             label = words[i]
             top5_label = map(lambda x:words[x].split(" ",1)[1].split(",")[0], top5)
             top5_label.reverse()
             label = ": ".join(top5_label)
+            latency = t2-t1
             print(i, label)
-            print(t2-t1, t3-t2)
 
         print "{} wrote:".format(self.client_address[0])
         response = request_pb2.DNNResponse()
         response.success = True
         response.result = i
         response.result_str = label
+        response.latency = latency
         #response.confidence = prob
         s = response.SerializeToString()
         packed_len = struct.pack('>L', len(s))
