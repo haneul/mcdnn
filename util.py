@@ -1,5 +1,9 @@
 import numpy as np
 import caffe
+import request_pb2
+import socket
+import struct
+import time
 def predict(inputs, image_dims, crop_dims, net):
     input_ = np.zeros((len(inputs),
         image_dims[0], image_dims[1], inputs[0].shape[2]), 
@@ -45,3 +49,44 @@ def detect_and_crop(src, dst):
         cv2.imwrite(dst, cropped)
         cnt += 1
 
+def send_message(sock, message):
+    s = message.SerializeToString()
+    packed_len = struct.pack('>L', len(s))
+    sock.sendall(packed_len + s)
+
+def socket_read_n(sock, n):
+    """ Read exactly n bytes from the socket.
+        Raise RuntimeError if the connection closed before
+        n bytes were read.
+    """
+    buf = ''
+    while n > 0:
+        data = sock.recv(n)
+        if data == '':
+            raise RuntimeError('unexpected connection close')
+        buf += data
+        n -= len(data)
+    return buf
+
+# Create a socket (SOCK_STREAM means a TCP socket)
+def sendFrame(frame, HOST, PORT, typ=request_pb2.OBJECT):
+    print(frame.shape)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        sock.connect((HOST, PORT))
+        retval, buf = cv2.imencode(".jpg", frame)
+        req = request_pb2.DNNRequest()
+        req.type = typ 
+        req.data = str(bytearray(buf))
+        send_message(sock, req)
+        len_buf = socket_read_n(sock, 4)
+        msg_len = struct.unpack('>L', len_buf)[0]
+        msg_buf = socket_read_n(sock, msg_len)
+        msg = request_pb2.DNNResponse() 
+        msg.ParseFromString(msg_buf)
+        end = time.time()
+        print(typ, msg.result_str)
+    finally:
+        sock.close()
+    if msg != None:
+        return msg.result_str, msg.latency*1000

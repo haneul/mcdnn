@@ -10,50 +10,10 @@ import time
 import collections
 import img_util
 
-def send_message(sock, message):
-    s = message.SerializeToString()
-    packed_len = struct.pack('>L', len(s))
-    sock.sendall(packed_len + s)
-
-def socket_read_n(sock, n):
-    """ Read exactly n bytes from the socket.
-        Raise RuntimeError if the connection closed before
-        n bytes were read.
-    """
-    buf = ''
-    while n > 0:
-        data = sock.recv(n)
-        if data == '':
-            raise RuntimeError('unexpected connection close')
-        buf += data
-        n -= len(data)
-    return buf
 
 
 HOST, PORT = "archon.cs.washington.edu", int(sys.argv[1])
-# Create a socket (SOCK_STREAM means a TCP socket)
-def sendFrame(frame, typ=request_pb2.OBJECT):
-    print(frame.shape)
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    try:
-        sock.connect((HOST, PORT))
-        retval, buf = cv2.imencode(".jpg", frame)
-        req = request_pb2.DNNRequest()
-        req.type = typ 
-        req.data = str(bytearray(buf))
-        send_message(sock, req)
-        len_buf = socket_read_n(sock, 4)
-        msg_len = struct.unpack('>L', len_buf)[0]
-        msg_buf = socket_read_n(sock, msg_len)
-        msg = request_pb2.DNNResponse() 
-        msg.ParseFromString(msg_buf)
-        end = time.time()
-        print(typ, msg.result_str)
-    finally:
-        sock.close()
-    if msg != None:
-        return msg.result_str, msg.latency*1000
-     
+from util import sendFrame
 
 cascPath = "opencv_xml/haarcascade_frontalface_default.xml"
 faceCascade = cv2.CascadeClassifier(cascPath)
@@ -112,7 +72,7 @@ while True:
         print("Face found!")
         x, y, w, h = map(lambda x:4*x, [x,y,w,h]) 
         cv2.rectangle(frame, (x,y), (x+w,y+h), (0,0,255)) 
-        label, latency = sendFrame(frame[y:y+h, x:x+w], request_pb2.FACE)
+        label, latency = sendFrame(frame[y:y+h, x:x+w], HOST, PORT, request_pb2.FACE)
         #retval, buf = cv2.imencode(".jpg", frame[y:y+h, x:x+w])
         #label2 = face_util.detect_face(frame[y:y+h, x:x+w])
         #label2 = face_util.detect_face(img_util.load_image_from_memory(buf))
@@ -157,14 +117,14 @@ while True:
         break
     elif key & 0xFF == ord('c'):
         beg_obj = time.time()
-        lastlabel, ct = sendFrame(frame)
+        lastlabel, ct = sendFrame(frame, HOST, PORT)
         end_obj = time.time()
         print(end_obj-beg_obj)
         puttext_time = time.time()
     elif key & 0xFF == ord('f'):
         face_mode = not face_mode
     elif key & 0xFF == ord('s'):
-        lastlabel, ct = sendFrame(frame, request_pb2.SCENE)
+        lastlabel, ct = sendFrame(frame, HOST, PORT, request_pb2.SCENE)
         puttext_time = time.time()
     #cnt += 1
     #if cnt == 100: break
