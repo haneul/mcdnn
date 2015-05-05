@@ -10,7 +10,7 @@ def procStatus():
 r1 = resource.getrusage(resource.RUSAGE_SELF)
 net = caffe.Net(sys.argv[1]+".prototxt", sys.argv[1]+".caffemodel", 1)
 caffe.set_phase_test()
-caffe.set_mode_cpu()
+caffe.set_mode_gpu()
 del net
 m1 = procStatus()
 r2 = resource.getrusage(resource.RUSAGE_SELF)

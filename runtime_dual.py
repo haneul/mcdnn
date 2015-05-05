@@ -64,6 +64,20 @@ network_on = True
 HOST, PORT = "archon.cs.washington.edu", 9999 
 from util import sendFrame
 
+def check_internet():
+    global network_on
+    while not network_on:
+        print("internet check")
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            sock.connect( (HOST, PORT) )
+            network_on = True
+            break
+        except:
+            pass
+        time.sleep(3)
+import threading
+
 while True:
     ret, frame = cap.read()
     if not ret:
@@ -106,6 +120,8 @@ while True:
                 label, latency = sendFrame(frame[y:y+h, x:x+w], HOST, PORT, request_pb2.FACE)
             except:
                 network_on = False
+                t = threading.Timer(3, check_internet)
+                t.start()
 
         if not network_on:
             print("local")
