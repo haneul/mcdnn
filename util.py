@@ -90,3 +90,33 @@ def sendFrame(frame, HOST, PORT, typ=request_pb2.OBJECT):
         sock.close()
     if msg != None:
         return msg.result_str, msg.latency*1000
+
+
+def specialize(lst):
+    beg = time.time() 
+    traindata = np.load("face_models/C0/train.2.npy")
+    valdata = np.load("face_models/C0/test.2.npy")
+    trainlabel = np.load("face_models/train.label.npy")
+    vallabel = np.load("face_models/test.label.npy")
+    indices = []
+    for i in range(len(trainlabel)):
+        if(trainlabel[i] in lst):
+            indices.append(i)
+    traindata = traindata[indices,:,:,:]
+    trainlabel = np.array(trainlabel[indices],dtype="f")
+    indices = []
+    for i in range(len(vallabel)):
+        if(vallabel[i] in lst):
+            indices.append(i)
+    valdata = valdata[indices,:,:,:]
+    vallabel = vallabel[indices]
+
+    solver = caffe.SGDSolver("c0_solver2.prototxt")
+    caffe.set_mode_gpu()
+    solver.net.set_input_arrays(traindata, trainlabel)
+    for net in solver.test_nets:
+        net.set_input_arrays(valdata,  np.array(vallabel, dtype='f')) 
+    solver.solve()
+    end = time.time()
+    print(end-beg)
+
