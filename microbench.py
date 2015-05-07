@@ -1,5 +1,7 @@
 import caffe, resource, sys, os, time
 import numpy as np
+#GPU = True
+GPU = False 
 
 def procStatus():
     pid = os.getpid()
@@ -10,7 +12,10 @@ def procStatus():
 r1 = resource.getrusage(resource.RUSAGE_SELF)
 net = caffe.Net(sys.argv[1]+".prototxt", sys.argv[1]+".caffemodel", 1)
 caffe.set_phase_test()
-caffe.set_mode_gpu()
+if GPU:
+    caffe.set_mode_gpu()
+else:
+    caffe.set_mode_cpu()
 del net
 m1 = procStatus()
 r2 = resource.getrusage(resource.RUSAGE_SELF)
