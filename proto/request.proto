@@ -10,6 +10,7 @@ message DNNRequest {
     required RequestType type = 1;
     optional int32 layer = 2;
     optional bytes data = 3;
+    optional string model = 4;
 };
 
 message DNNResponse {
