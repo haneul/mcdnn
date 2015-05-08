@@ -10,8 +10,9 @@ sys.path.append("..")
 #caffe.set_phase_test()
 
 from example import * 
-net = face_net([152,152], [152,152], "D0.bottom2.prototxt", "D0.bottom2.caffemodel")
-net1 = face_net([152,152], [152,152], "D0.bottom.prototxt", "D0.bottom.caffemodel")
+#net = face_net([152,152], [152,152], "D0.bottom2.prototxt", "D0.bottom2.caffemodel")
+#net1 = face_net([152,152], [152,152], "D0.bottom.prototxt", "D0.bottom.caffemodel")
+netc0 = face_net([152,152], [152,152], "C0.bottom2.prototxt", "C0.caffemodel")
 
 
 
@@ -20,7 +21,7 @@ def generate_npy(net, lns, filename, layer_name):
     images = []
     beg = time.time()
     for line in lns:
-        sp = line.split("\t")
+        sp = line.split()
         path = os.path.join(image_root,sp[0])
         images.append(skimage.io.imread(path))
     load_end = time.time()
@@ -54,8 +55,20 @@ generate_npy(net, lines, "test.2", "Result")
 generate_npy(net1, lines, "test.1", "fc7")
 """
 
-with open("/home/haichen/datasets/MSRBingFaces/labels/faces.train.shuf.label", "r")  as f:
+with open("/home/haichen/datasets/MSRBingFaces/labels/faces_train.shuf.txt", "r")  as f:
     lines = map(lambda x:x.strip(), f.readlines())
 
-generate_npy(net, lines, "D0/train.2", "Result")
+labels = np.array(map(lambda x:int(x.split()[1]), lines))
+np.save("train.label.npy", labels)
+
+#generate_npy(net, lines, "D0/train.2", "Result")
+#generate_npy(netc0, lines, "C0/train.2", "Result")
+
+with open("/home/haichen/datasets/MSRBingFaces/labels/faces_test.txt", "r")  as f:
+    lines = map(lambda x:x.strip(), f.readlines())
+
+labels = np.array(map(lambda x:int(x.split()[1]), lines))
+np.save("test.label.npy", labels)
+
+#generate_npy(netc0, lines, "C0/test.2", "Result")
 
