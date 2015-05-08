@@ -54,10 +54,10 @@ if args.nocompact:
 else:
     o.target = "C0"
 
-o.others = args.others 
-o.sharing =  not args.nosharing 
-o.gpu = not args.cpu
-fn1, fn2, others = face_util.load_net(o)
+#o.others = args.others 
+#o.sharing =  not args.nosharing 
+#o.gpu = not args.cpu
+#fn1, fn2, others = face_util.load_net(o)
 compute_t = 0
 ct = 0
 network_on = True
@@ -76,15 +76,62 @@ def check_internet():
         except:
             pass
         time.sleep(3)
+
 import threading
+from scheduler import * 
+
+class RuntimeScheduler:
+    def __init__(self, name, energy_budget, cost_budget):
+        self.name = name
+        self.energy_budget = float(energy_budget)
+        self.cost_budget = float(cost_budget)
+        self.applications = collections.defaultdict(list) 
+        self.in_cache = {}
+        self.in_cache[Location.DEVICE] = []
+        self.in_cache[Location.SERVER] = []
+     
+    def add_application(self, app_type, application):
+        self.applications[app_type].append(application)
+
+    def execute_task(self, app_type):
+        tApp = self.applications[app_type]
+        global network_on
+        if network_on:
+            target_s = tApp.models
+        else:
+            target_s = []
+            
+        target_c = tApp.models 
+
+        if tApp.status == Location.NOTRUNNING: # cold miss
+            target_s = filter(lambda x: check_server(x, RTT, latency_limit), target_s) 
+            target_c = filter(lambda x: check_device(x, latency_limit), target_c) 
+          
+        try: 
+            server_pick = target_s[0]
+            server_pick.location = Location.SERVER
+            picks.append(server_pick)
+        except:
+            server_pick = None
+        try:
+            client_pick = target_c[0]
+            client_pick.location = Location.DEVICE
+            picks.append(client_pick)
+        except:
+            client_pick = None
+
+
+scheduler = RuntimeScheduler("multi", 2*3600, 0.0667)
+param = model_pb2.ApplicationModel()
+with open("model_sample.prototxt") as f:
+    google.protobuf.text_format.Merge(f.read(), param)
+
 
 while True:
     ret, frame = cap.read()
     if not ret:
         continue
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    gray = cv2.resize(gray, (160, 120), interpolation = cv2.INTER_CUBIC) 
-    #gray = cv2.resize(gray, (320, 240), interpolation = cv2.INTER_CUBIC) 
+
     put = False
     face = False
     now = time.time()
@@ -92,8 +139,11 @@ while True:
     for i in fps_list:
         if now - i > 1:
             fps_list.remove(i)
+
     faces = []
     if face_mode:# and (now-last_face_t) > 5:
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        gray = cv2.resize(gray, (160, 120), interpolation = cv2.INTER_CUBIC) 
         faces = faceCascade.detectMultiScale(
             gray,
             scaleFactor = 1.2,
@@ -109,7 +159,6 @@ while True:
     cv2.rectangle(frame, (0,0), (640,50), (0,0,0), -1)
     t1, t2 = 0,0
     for x, y, w, h in faces:
-        #print("Face found!")
         x, y, w, h = map(lambda x:4*x, [x,y,w,h]) 
         cv2.rectangle(frame, (x,y), (x+w,y+h), (0,0,255)) 
         retval, buf = cv2.imencode(".jpg", frame[y:y+h, x:x+w])
@@ -135,6 +184,7 @@ while True:
         puttext_time = now 
         face = True
         break
+
     counter = collections.Counter()
     for i in label_list: 
         if now - i[0] > 3:
@@ -145,10 +195,10 @@ while True:
     if face and len(counter) > 0:
         lastlabel = counter.most_common() [0][0]
 
-    if now-puttext_time < 10:
+    if now - puttext_time < 10:
         cv2.putText(frame,lastlabel, (10,30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 2)
 
-    if now-last_fps_update > 1:
+    if now - last_fps_update > 1:
         last_fps_update = now
         fps = []
         prev = fps_list[0]

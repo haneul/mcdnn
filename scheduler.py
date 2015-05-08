@@ -338,8 +338,8 @@ with open("disconnect.pcl", "rb") as f:
 
 
 import matplotlib.pyplot as plt 
-from mpltools import style
-style.use('ggplot')
+#from mpltools import style
+#style.use('ggplot')
 
 def plot_energy_and_cost(ax, res, ylim):
     ln = ax.plot(map(lambda x:x[0], res), map(lambda x:x[1], res), c='b', label='Energy')
@@ -743,7 +743,7 @@ def scenario(i, desc):
         print("average acc:", sum(all_acc)/float(len(all_acc)))
 
 
-scenario(3, "")
+#scenario(3, "")
 """
 ax = fig.add_subplot(311)
 ln = ax.plot(map(lambda x:x[0], res), map(lambda x:x[1], res), c='b', label='Energy')
