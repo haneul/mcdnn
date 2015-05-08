@@ -441,7 +441,7 @@ def depict_special(res, r1, filename, sp_trace, ylim=18000):
     fig.savefig(filename, bbox_inches='tight')
 
 param = model_pb2.ApplicationModel()
-with open("model_sample.prototxt") as f:
+with open("deepface.prototxt") as f:
     google.protobuf.text_format.Merge(f.read(), param)
 
 # load face trace

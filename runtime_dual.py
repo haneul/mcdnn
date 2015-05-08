@@ -12,8 +12,6 @@ import face_util
 import img_util
 import argparse
 
-
-
 cascPath = "opencv_xml/haarcascade_frontalface_default.xml"
 faceCascade = cv2.CascadeClassifier(cascPath)
 print("capture")
@@ -89,12 +87,15 @@ class RuntimeScheduler:
         self.in_cache = {}
         self.in_cache[Location.DEVICE] = []
         self.in_cache[Location.SERVER] = []
+        self.started = time.time()
+        
      
     def add_application(self, app_type, application):
         self.applications[app_type].append(application)
 
-    def execute_task(self, app_type):
-        tApp = self.applications[app_type]
+    def execute_task(self, app_type, frame):
+        tApp = self.applications[app_type][0]
+        now = time.time()
         global network_on
         if network_on:
             target_s = tApp.models
@@ -102,10 +103,34 @@ class RuntimeScheduler:
             target_s = []
             
         target_c = tApp.models 
+        print(len(target_s), len(target_c))
 
         if tApp.status == Location.NOTRUNNING: # cold miss
             target_s = filter(lambda x: check_server(x, RTT, latency_limit), target_s) 
             target_c = filter(lambda x: check_device(x, latency_limit), target_c) 
+
+        freqsqsum = sum(map(lambda x:x.freq*x.freq, self.in_cache[Location.SERVER]))
+        if tApp.status == Location.SERVER:
+            freqsqsum -= (tApp.freq * tApp.freq)
+        
+        until = 36000
+        i = now - self.started 
+        target_s = filter(lambda x: check_server_cost(x, self.cost_budget, until-i, server_cost, tApp.freq, freqsqsum), target_s)
+
+        freqsqsum = sum(map(lambda x:x.freq*x.freq, self.in_cache[Location.DEVICE]))
+        if tApp.status == Location.DEVICE:
+            freqsqsum -= (tApp.freq * tApp.freq)
+
+        target_c = filter(lambda x: check_device_cost(x, self.energy_budget, until-i, tApp.status==Location.SERVER, 
+            (i-tApp.last_swapin), tApp.freq, freqsqsum), target_c)
+
+        print(len(target_s), len(target_c))
+        #freqsqsum = sum(map(lambda x:x.freq*x.freq, self.in_cache[Location.SERVER]))
+        #if tApp.status == Location.SERVER:
+        #    freqsqsum -= (tApp.freq * tApp.freq)
+        picks = []
+        target_s.sort(key=lambda x:x.accuracy, reverse=True)
+        target_c.sort(key=lambda x:x.accuracy, reverse=True)
           
         try: 
             server_pick = target_s[0]
@@ -120,12 +145,65 @@ class RuntimeScheduler:
         except:
             client_pick = None
 
+        print(server_pick)
+        print(client_pick)
+
+        picks.sort(key=lambda x:x.accuracy, reverse=True)
+        pick = picks[0]
+        # update budegt
+        if pick.location == Location.SERVER:
+            self.cost_budget -= server_pick.s_compute_latency * server_cost
+            self.energy_budget -= send_energy
+
+            if tApp.status != Location.SERVER:
+                try:
+                    self.in_cache[tApp.status].remove(tApp)
+                except KeyError:
+                    pass
+                self.in_cache[pick.location].append(tApp)
+
+        elif pick.location == Location.DEVICE:
+            if tApp.status != pick.location:
+                self.energy_budget -= client_pick.loading_energy
+                tApp.last_swapin = i
+                try:
+                    self.in_cache[tApp.status].remove(tApp)
+                except KeyError:
+                    pass
+                self.in_cache[pick.location].append(tApp)
+
+            self.energy_budget -= client_pick.compute_energy
+        else:
+            print("ERROR")
+            exit()
+
+        reexecute = False
+        if pick.location == Location.SERVER:
+            try:
+                label, latency = sendFrame(frame, HOST, PORT, request_pb2.FACE, pick.name)
+                print(label)
+            except:
+                network_on = False
+                reexecute = True
+                t = threading.Timer(3, check_internet)
+                t.start()
+
+        if reexecute or pick.location == Location.DEVICE:
+            print("local")
+            retval, buf = cv2.imencode(".jpg", frame)
+            #label = face_util.detect_face(img_util.load_image_from_memory(buf), fn1, fn2, others, o.sharing)
+
+        tApp.status = pick.location
+        tApp.pick = pick
+        return label
+
 
 scheduler = RuntimeScheduler("multi", 2*3600, 0.0667)
 param = model_pb2.ApplicationModel()
-with open("model_sample.prototxt") as f:
+with open("deepface.prototxt") as f:
     google.protobuf.text_format.Merge(f.read(), param)
-
+face_app = Application("deepface", 1, param.models)
+scheduler.add_application(AppType.FACE, face_app)
 
 while True:
     ret, frame = cap.read()
@@ -161,21 +239,8 @@ while True:
     for x, y, w, h in faces:
         x, y, w, h = map(lambda x:4*x, [x,y,w,h]) 
         cv2.rectangle(frame, (x,y), (x+w,y+h), (0,0,255)) 
-        retval, buf = cv2.imencode(".jpg", frame[y:y+h, x:x+w])
         t1 = time.time()
-        if network_on:
-            print("network")
-            try:
-                label, latency = sendFrame(frame[y:y+h, x:x+w], HOST, PORT, request_pb2.FACE)
-            except:
-                network_on = False
-                t = threading.Timer(3, check_internet)
-                t.start()
-
-        if not network_on:
-            print("local")
-            label = face_util.detect_face(img_util.load_image_from_memory(buf), fn1, fn2, others, o.sharing)
-
+        label = scheduler.execute_task(AppType.FACE, frame[y:y+h, x:x+w])
         t2 = time.time()
         compute_t = t2-t1
         put = True

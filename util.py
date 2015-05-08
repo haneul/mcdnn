@@ -69,7 +69,7 @@ def socket_read_n(sock, n):
     return buf
 
 # Create a socket (SOCK_STREAM means a TCP socket)
-def sendFrame(frame, HOST, PORT, typ=request_pb2.OBJECT):
+def sendFrame(frame, HOST, PORT, typ=request_pb2.OBJECT, name=None):
     print(frame.shape)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
@@ -78,6 +78,8 @@ def sendFrame(frame, HOST, PORT, typ=request_pb2.OBJECT):
         req = request_pb2.DNNRequest()
         req.type = typ 
         req.data = str(bytearray(buf))
+        if(name != None):
+            req.model = name
         send_message(sock, req)
         len_buf = socket_read_n(sock, 4)
         msg_len = struct.unpack('>L', len_buf)[0]
