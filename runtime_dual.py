@@ -11,6 +11,7 @@ import collections
 import face_util
 import img_util
 import argparse
+import os
 
 cascPath = "opencv_xml/haarcascade_frontalface_default.xml"
 faceCascade = cv2.CascadeClassifier(cascPath)
@@ -33,6 +34,8 @@ face_mode = False
 fps_list = []
 last_fps_update = time.time()
 cur_fps = -1
+
+from example import * 
 
 class Option:
     def __init__(self, others=False, sharing=False):
@@ -60,6 +63,7 @@ compute_t = 0
 ct = 0
 network_on = True
 HOST, PORT = "archon.cs.washington.edu", 9999 
+model_path = "/media/sdcard"
 from util import sendFrame
 
 def check_internet():
@@ -88,7 +92,7 @@ class RuntimeScheduler:
         self.in_cache[Location.DEVICE] = []
         self.in_cache[Location.SERVER] = []
         self.started = time.time()
-        
+        self.models = {}
      
     def add_application(self, app_type, application):
         self.applications[app_type].append(application)
@@ -192,6 +196,10 @@ class RuntimeScheduler:
             print("local")
             retval, buf = cv2.imencode(".jpg", frame)
             #label = face_util.detect_face(img_util.load_image_from_memory(buf), fn1, fn2, others, o.sharing)
+            pname = str(pick.name)
+            if pname not in self.models:
+                self.models[pname] =  face_net([152,152], [152,152], os.path.join(model_path, pname+".prototxt"), os.path.join(model_path, pname+".caffemodel"), 1)
+            label = face_util.detect_face_orig(img_util.load_image_from_memory(buf), self.models[pname])
 
         tApp.status = pick.location
         tApp.pick = pick
