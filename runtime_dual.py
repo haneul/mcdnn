@@ -34,6 +34,7 @@ face_mode = False
 fps_list = []
 last_fps_update = time.time()
 cur_fps = -1
+running = True
 
 from example import * 
 
@@ -67,8 +68,8 @@ model_path = "/media/sdcard"
 from util import sendFrame
 
 def check_internet():
-    global network_on
-    while not network_on:
+    global network_on, running
+    while not network_on and running:
         print("internet check")
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
@@ -151,6 +152,14 @@ class RuntimeScheduler:
 
         print(server_pick)
         print(client_pick)
+        # not server_only
+        if len(picks) == 0:
+            target_c = tApp.models 
+            target_c.sort(key=lambda x:x.compute_energy)
+            if target_c[0].compute_energy < self.energy_budget:
+                client_pick = target_c[0]
+                client_pick.location = Location.DEVICE
+                picks.append(client_pick)
 
         picks.sort(key=lambda x:x.accuracy, reverse=True)
         pick = picks[0]
@@ -305,6 +314,7 @@ while True:
         end_obj = time.time()
     #cnt += 1
     #if cnt == 100: break
+running = False
 end = time.time()
 print(cnt/float(end-beg))
 cap.release()
