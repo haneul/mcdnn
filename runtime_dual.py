@@ -205,6 +205,13 @@ with open("deepface.prototxt") as f:
 face_app = Application("deepface", 1, param.models)
 scheduler.add_application(AppType.FACE, face_app)
 
+param2 = model_pb2.ApplicationModel()
+with open("vgg.prototxt") as f:
+    google.protobuf.text_format.Merge(f.read(), param2)
+
+obj_app = Application("obj-vgg", 1, param.models)
+scheduler.add_application(AppType.OBJECT, obj_app)
+
 while True:
     ret, frame = cap.read()
     if not ret:
@@ -284,6 +291,10 @@ while True:
         break
     elif key & 0xFF == ord('f'):
         face_mode = not face_mode
+    elif key & 0xFF == ord('c'):
+        beg_obj = time.time()
+        lastlabel = scheduler.execute_task(AppType.OBJECT, frame)
+        end_obj = time.time()
     #cnt += 1
     #if cnt == 100: break
 end = time.time()
