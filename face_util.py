@@ -30,14 +30,17 @@ def load_net(option):
                 fn = face_net1
             others.append((fn, model))
     return (face_net1, face_net2, others)
-        
+
+with open("facelabels.txt") as f:
+    face_words = f.readlines()[1:]
+face_words = map(lambda x: x.strip(), face_words)
         
 def detect_face_orig(input_image, face_net):
     prepared = face_input_prepare(face_net1, [input_image]) 
     out = face_net.forward_all(**{face_net.inputs[0]: prepared})
     i = out["prob"].argmax()
-    prob = out["prob"].squeeze(axis=(2,3))[0][i]
-    label = target1[i] + " " + ",".join(other_label)
+    #prob = out["prob"].squeeze(axis=(2,3))[0][i]
+    label = face_words[i] 
     return label
 
 
