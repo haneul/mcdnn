@@ -1,0 +1,40 @@
+models {
+   name: "vgg19_fc6_2048_fc7_2048_svd"
+   loading_energy: 9.96
+   compute_energy: 6.82
+   loading_latency: 4247.5
+   compute_latency: 916.5
+   accuracy: 69.39
+   s_loading_latency: 1182.24
+   s_compute_latency: 34.64
+}
+models {
+   name: "vgg19_fc6_1024_fc7_1024_svd"
+   loading_energy: 5.67
+   compute_energy: 6.34
+   loading_latency: 1622.3
+   compute_latency: 787.6
+   accuracy: 69.31
+   s_loading_latency: 739.82
+   s_compute_latency: 32.9
+}
+models {
+   name: "vgg19_fc6_512_fc7_256_svd"
+   loading_energy: 6.34
+   compute_energy: 6.04
+   loading_latency: 1107.7
+   compute_latency: 699
+   accuracy: 68.84
+   s_loading_latency: 497.71
+   s_compute_latency: 31.85
+}
+models {
+   name: "vgg19_fc6_128_fc7_256_svd"
+   loading_energy: 4.89
+   compute_energy: 6.01
+   loading_latency: 830.1
+   compute_latency: 723.5
+   accuracy: 67
+   s_loading_latency: 378.16
+   s_compute_latency: 31.42
+}
