@@ -99,7 +99,9 @@ class RuntimeScheduler:
         self.applications[app_type].append(application)
 
     def execute_task(self, app_type, frame):
+        print(app_type)
         tApp = self.applications[app_type][0]
+        print(tApp.models)
         now = time.time()
         global network_on
         if network_on:
@@ -113,6 +115,7 @@ class RuntimeScheduler:
         if tApp.status == Location.NOTRUNNING: # cold miss
             target_s = filter(lambda x: check_server(x, RTT, latency_limit), target_s) 
             target_c = filter(lambda x: check_device(x, latency_limit), target_c) 
+        print(len(target_s), len(target_c))
 
         freqsqsum = sum(map(lambda x:x.freq*x.freq, self.in_cache[Location.SERVER]))
         if tApp.status == Location.SERVER:
@@ -162,6 +165,7 @@ class RuntimeScheduler:
                 picks.append(client_pick)
 
         picks.sort(key=lambda x:x.accuracy, reverse=True)
+        print(picks)
         pick = picks[0]
         # update budegt
         if pick.location == Location.SERVER:
@@ -193,8 +197,8 @@ class RuntimeScheduler:
         reexecute = False
         if pick.location == Location.SERVER:
             try:
-                label, latency = sendFrame(frame, HOST, PORT, request_pb2.FACE, pick.name)
-                print(label)
+                #label, latency = sendFrame(frame, HOST, PORT, request_pb2.FACE, pick.name)
+                label, latency = sendFrame(frame, HOST, PORT, app_type, pick.name)
             except:
                 network_on = False
                 reexecute = True
@@ -215,19 +219,19 @@ class RuntimeScheduler:
         return label
 
 
-scheduler = RuntimeScheduler("multi", 2*3600, 0.0667)
+scheduler = RuntimeScheduler("multi", 2*3600, 0.25)
 param = model_pb2.ApplicationModel()
 with open("deepface.prototxt") as f:
     google.protobuf.text_format.Merge(f.read(), param)
-face_app = Application("deepface", 1, param.models)
-scheduler.add_application(AppType.FACE, face_app)
+face_app = Application("deepface", 1., param.models)
+scheduler.add_application(request_pb2.FACE, face_app)
 
 param2 = model_pb2.ApplicationModel()
 with open("vgg.prototxt") as f:
     google.protobuf.text_format.Merge(f.read(), param2)
 
-obj_app = Application("obj-vgg", 1, param.models)
-scheduler.add_application(AppType.OBJECT, obj_app)
+obj_app = Application("obj-vgg", 1., param2.models)
+scheduler.add_application(request_pb2.OBJECT, obj_app)
 
 while True:
     ret, frame = cap.read()
@@ -264,7 +268,7 @@ while True:
         x, y, w, h = map(lambda x:4*x, [x,y,w,h]) 
         cv2.rectangle(frame, (x,y), (x+w,y+h), (0,0,255)) 
         t1 = time.time()
-        label = scheduler.execute_task(AppType.FACE, frame[y:y+h, x:x+w])
+        label = scheduler.execute_task(request_pb2.FACE, frame[y:y+h, x:x+w])
         t2 = time.time()
         compute_t = t2-t1
         put = True
@@ -309,9 +313,8 @@ while True:
     elif key & 0xFF == ord('f'):
         face_mode = not face_mode
     elif key & 0xFF == ord('c'):
-        beg_obj = time.time()
-        lastlabel = scheduler.execute_task(AppType.OBJECT, frame)
-        end_obj = time.time()
+        lastlabel = scheduler.execute_task(request_pb2.OBJECT, frame)
+        puttext_time = time.time()
     #cnt += 1
     #if cnt == 100: break
 running = False
