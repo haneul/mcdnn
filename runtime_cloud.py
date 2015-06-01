@@ -15,12 +15,15 @@ from img_util import load_image_from_memory, load_face_from_memory
 with open("/home/haichen/datasets/MSRBingFaces/facelabels.txt") as f:
     face_words = f.readlines()[1:]
 face_words = map(lambda x: x.strip(), face_words)
+with open("/home/haichen/datasets/imagenet/meta/2012/synset_words_caffe.txt") as f:
+    words = f.readlines()
+words = map(lambda x: x.strip(), words)
+
 model_path = "../../haichen/models/caffe/"
 
 from example import * 
 loaded_model = {}
-#net = face_net([152,152], [152,152], os.path.join(model_path, target_model+".prototxt"), os.path.join(model_path, target_model+".caffemodel"), 1)
-#exit(0)
+caffe_dir = "../caffe"
 
 class MyTCPHandler(SocketServer.StreamRequestHandler):
 
@@ -39,9 +42,15 @@ class MyTCPHandler(SocketServer.StreamRequestHandler):
         return buf
 
     def load_model(self, target_model, req_type):
+        model_file = os.path.join(model_path, target_model+".prototxt")
+        pretrained = os.path.join(model_path, target_model+".caffemodel")
         if(req_type == request_pb2.FACE):
             print("loading " + target_model)
-            net = face_net([152,152], [152,152], os.path.join(model_path, target_model+".prototxt"), os.path.join(model_path, target_model+".caffemodel"), 1)
+            net = face_net([152,152], [152,152], model_file, pretrained, 1)
+            return net
+        elif(req_type == request_pb2.OBJECT):
+            print("loading " + target_model)
+            net = caffe.Classifier(model_file, pretrained, mean=np.load(caffe_dir + '/python/caffe/imagenet/ilsvrc_2012_mean.npy'), gpu=True, channel_swap=(2,1,0), image_dims=(256,256), raw_scale=255, batch=1)
             return net
         else:
             print("ERROR")
@@ -106,13 +115,13 @@ class MyTCPHandler(SocketServer.StreamRequestHandler):
         #prediction = net.forward_all(data=np.asarray([net.preprocess('data', input_image)]))
             input_image = load_image_from_memory(req.data)
             t1 = time.time()
-            images = np.asarray(caffe.io.oversample([input_image], net.crop_dims))
+            images = np.asarray(caffe.io.oversample([input_image], model.crop_dims))
             caffe_in = np.zeros(np.array(images.shape)[[0,3,1,2]],
                              dtype=np.float32)
             for ix, in_ in enumerate(images):
-                caffe_in[ix] = net.preprocess('data', in_)
-            out = net.forward_all(data=caffe_in)
-            prediction = out[net.outputs[0]].squeeze(axis=(2,3))
+                caffe_in[ix] = model.preprocess('data', in_)
+            out = model.forward_all(data=caffe_in)
+            prediction = out[model.outputs[0]].squeeze(axis=(2,3))
             prediction = prediction.reshape((len(prediction) / 10, 10, -1))
             prediction = prediction.mean(1)
             top5 = prediction.argsort()[0][-5:]

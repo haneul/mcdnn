@@ -71,6 +71,10 @@ import psutil
 #p.set_cpu_affinity(range(12,24))
 
 class MyTCPHandler(SocketServer.StreamRequestHandler):
+    def server_bind(self):
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.socket.bind(self.server_address)
+
     def read_n(self, n):
         buf = ''
         while n > 0:

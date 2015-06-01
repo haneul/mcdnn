@@ -1,7 +1,7 @@
 import caffe, resource, sys, os, time
 import numpy as np
-#GPU = True
-GPU = False 
+GPU = True
+#GPU = False 
 
 def procStatus():
     pid = os.getpid()
