@@ -72,8 +72,8 @@ class Thermal:
         self.handle = handle
         self.sensors = {}
         self.Image = np.zeros((TotalColumns, TotalRows))#[[0]*TotalRows] * TotalColumns
-        self.width = 500
-        self.height = 500
+        self.width = 640
+        self.height = 480
         self.Im = create_blank(self.width, self.height)
         self.pixel_width = self.width / TotalColumns
         self.pixel_height = self.height / TotalRows
@@ -96,7 +96,6 @@ class Thermal:
             self.sensors[sensor_id].LastResults = [0] * FETCH_ALL_LENGTH_WORDS
             for i in range(FETCH_ALL_LENGTH_WORDS):
                 self.sensors[sensor_id].LastResults[i] = msg.RawData[sensor_id * FETCH_ALL_LENGTH_WORDS + i]
-                print(sensor_id, i, self.sensors[sensor_id].LastResults[i])
             self.sensors[sensor_id].calc_temperature()
 
         scale = 1.0
@@ -111,11 +110,9 @@ class Thermal:
                 r = first_row
                 while r < first_row + RowsPerSensor:
                     self.Image[c][r] = self.sensors[sensor_id].Temperature[i] * scale + offset
-                    print(sensor_id,c,r,self.Image[c][r])
                     r += 1
                     i += 1
                 c += 1
-        print(self.Image)
         self.show_image()
 
     def show_image(self):
@@ -130,13 +127,12 @@ class Thermal:
                 x = c * self.pixel_width
                 y = r * self.pixel_height
                 cv2.rectangle(self.Im, (x, y), (x+self.pixel_width, y+self.pixel_height), color, -1)
-        print("show") 
         cv2.imshow('frame', self.Im)
         cv2.waitKey(1)
         
 
     def run(self):
-        for i in range(300):
+        for i in range(600):    
             message = self._read_message()
             if len(message) == 0: continue
             header = MSG_HEADER(message[:4])
